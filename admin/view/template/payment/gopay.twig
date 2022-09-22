@@ -1,0 +1,170 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="float-end">
+                <button type="submit" form="form-payment" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa-solid fa-save"></i></button>
+                <a href="{{ back }}" data-bs-toggle="tooltip" title="{{ button_back }}" class="btn btn-light"><i class="fa-solid fa-reply"></i></a>
+            </div>
+            <h1>{{ heading_title }}</h1>
+            <ol class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-pencil"></i> {{ text_edit }}</div>
+            <div class="card-body">
+                <form id="form-payment" action="{{ save }}" method="post" data-oc-toggle="ajax">
+                    <div class="row mb-3">
+                        <label for="input-enabled" class="col-sm-2 col-form-label">{{ gopay_enable_disable }}</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch form-switch-lg">
+                                <input type="hidden" name="payment_gopay_enabled" value="0"/>
+                                <input type="checkbox" name="payment_gopay_enabled" value="1" id="input-enabled" class="form-check-input"{% if payment_gopay_enabled %} checked{% endif %}/>
+                            </div>
+                            <p>{{ gopay_enable_disable_tooltip }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-title" class="col-sm-2 col-form-label">{{ gopay_title }}</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="payment_gopay_title" value="{{ payment_gopay_title }}" placeholder="{{ gopay_title_placeholder }}" title="{{ gopay_title_tooltip }}" id="input-title" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-description" class="col-sm-2 col-form-label">{{ gopay_description }}</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="payment_gopay_description" value="{{ payment_gopay_description }}" placeholder="{{ gopay_description_placeholder }}" title="{{ gopay_description_tooltip }}" id="input-description" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-goid" class="col-sm-2 col-form-label">{{ gopay_goid }}</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="payment_gopay_goid" value="{{ payment_gopay_goid }}" placeholder="{{ gopay_goid_placeholder }}" id="input-goid" class="form-control"/>
+                            <p>{{ gopay_goid_tooltip }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-client_id" class="col-sm-2 col-form-label">{{ gopay_client_id }}</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="payment_gopay_client_id" value="{{ payment_gopay_client_id }}" placeholder="{{ gopay_client_id_placeholder }}" id="input-client_id" class="form-control"/>
+                            <p>{{ gopay_client_id_tooltip }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-client_secret" class="col-sm-2 col-form-label">{{ gopay_client_secret }}</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="payment_gopay_client_secret" value="{{ payment_gopay_client_secret }}" placeholder="{{ gopay_client_secret_placeholder }}" id="input-client_secret" class="form-control"/>
+                            <p>{{ gopay_client_secret_tooltip }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-test" class="col-sm-2 col-form-label">{{ gopay_test }}</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch form-switch-lg">
+                                <input type="hidden" name="payment_gopay_test" value="0"/>
+                                <input type="checkbox" name="payment_gopay_test" value="1" id="input-test" class="form-check-input"{% if payment_gopay_test %} checked{% endif %}/>
+                            </div>
+                            <p>{{ gopay_test_tooltip }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-default_language" class="col-sm-2 col-form-label">{{ gopay_default_language }}</label>
+                        <div class="col-sm-10">
+                            <select name="payment_gopay_default_language" id="input-default_language" title="{{ gopay_default_language_tooltip }}" class="form-select">
+                                {% for code, currency in setting['currencies'] %}
+                                    {% if code == payment_gopay_default_language %}
+                                        <option value="{{ code }}" selected="selected">{{ currency }}</option>
+                                    {% else %}
+                                        <option value="{{ code }}">{{ currency }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-shipping_methods" class="col-sm-2 col-form-label">{{ gopay_shipping_methods }}</label>
+                        <div class="col-sm-10">
+                            <select name="payment_gopay_shipping_methods[]" id="input-shipping_methods" title="{{ gopay_shipping_methods_tooltip }}" class="form-select" multiple>
+                                {% for code, shipping_method in shipping_methods %}
+                                    {% if code in payment_gopay_shipping_methods %}
+                                        <option value="{{ code }}" selected="selected">{{ shipping_method }}</option>
+                                    {% else %}
+                                        <option value="{{ code }}">{{ shipping_method }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-countries" class="col-sm-2 col-form-label">{{ gopay_countries }}</label>
+                        <div class="col-sm-10">
+                            <select name="payment_gopay_countries[]" id="input-countries" title="{{ gopay_countries_tooltip }}" class="form-select" multiple>
+                                {% for code, country in countries %}
+                                    {% if code in payment_gopay_countries %}
+                                        <option value="{{ code }}" selected="selected">{{ country }}</option>
+                                    {% else %}
+                                        <option value="{{ code }}">{{ country }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-simplified_bank" class="col-sm-2 col-form-label">{{ gopay_simplified_bank }}</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch form-switch-lg">
+                                <input type="hidden" name="payment_gopay_simplified_bank" value="0"/>
+                                <input type="checkbox" name="payment_gopay_simplified_bank" value="1" id="input-simplified_bank" class="form-check-input"{% if payment_gopay_simplified_bank %} checked{% endif %}/>
+                            </div>
+                            <p>{{ gopay_simplified_bank_tooltip }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-payment_methods" class="col-sm-2 col-form-label">{{ gopay_payment_methods }}</label>
+                        <div class="col-sm-10">
+                            <select name="payment_gopay_payment_methods[]" id="input-payment_methods" title="{{ gopay_payment_methods_tooltip }}" class="form-select" multiple>
+                                {% for code, payment_method in setting['payment_methods'] %}
+                                    {% if code in payment_gopay_payment_methods %}
+                                        <option value="{{ code }}" selected="selected">{{ payment_method }}</option>
+                                    {% else %}
+                                        <option value="{{ code }}">{{ payment_method }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-banks" class="col-sm-2 col-form-label">{{ gopay_banks }}</label>
+                        <div class="col-sm-10">
+                            <select name="payment_gopay_banks[]" id="input-banks" title="{{ gopay_banks_tooltip }}" class="form-select" multiple>
+                                {% for code, bank in setting['banks'] %}
+                                    {% if code in payment_gopay_banks %}
+                                        <option value="{{ code }}" selected="selected">{{ bank }}</option>
+                                    {% else %}
+                                        <option value="{{ code }}">{{ bank }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="input-payment_retry" class="col-sm-2 col-form-label">{{ gopay_payment_retry }}</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch form-switch-lg">
+                                <input type="hidden" name="payment_gopay_payment_retry" value="0"/>
+                                <input type="checkbox" name="payment_gopay_payment_retry" value="1" id="input-payment_retry" class="form-check-input"{% if payment_gopay_payment_retry %} checked{% endif %}/>
+                            </div>
+                            <p>{{ gopay_payment_retry_tooltip }}</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ footer }}
