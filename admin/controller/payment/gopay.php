@@ -62,22 +62,11 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$data['countries'] = $countries;
 		# End load countries
 
-		# GoPay load
-		$data['payment_gopay_enabled']          = $this->config->get( 'payment_gopay_enabled' );
-		$data['payment_gopay_title']            = $this->config->get( 'payment_gopay_title' );
-		$data['payment_gopay_description']      = $this->config->get( 'payment_gopay_description' );
-		$data['payment_gopay_goid']             = $this->config->get( 'payment_gopay_goid' );
-		$data['payment_gopay_client_id']        = $this->config->get( 'payment_gopay_client_id' );
-		$data['payment_gopay_client_secret']    = $this->config->get( 'payment_gopay_client_secret' );
-		$data['payment_gopay_test']             = is_numeric( $this->config->get( 'payment_gopay_test' ) ) ?
-			$this->config->get( 'payment_gopay_test' ) : 1;
-		$data['payment_gopay_default_language'] = $this->config->get( 'payment_gopay_default_language' );
-		$data['payment_gopay_shipping_methods'] = $this->config->get( 'payment_gopay_shipping_methods' );
-		$data['payment_gopay_countries']        = $this->config->get( 'payment_gopay_countries' );
-		$data['payment_gopay_simplified_bank']  = $this->config->get( 'payment_gopay_simplified_bank' );
-		$data['payment_gopay_payment_methods']  = $this->config->get( 'payment_gopay_payment_methods' );
-		$data['payment_gopay_banks']            = $this->config->get( 'payment_gopay_banks' );
-		$data['payment_gopay_payment_retry']    = $this->config->get( 'payment_gopay_payment_retry' );
+		# Check GoPay credentials and load options
+		$this->process_admin_options();
+		$data = array_merge( $data, $this->model_setting_setting->getSetting( 'payment_gopay' ) );
+		$data['payment_gopay_test'] = is_numeric( $data['payment_gopay_test'] ) ? $data['payment_gopay_test'] : 1;
+		# End GoPay load
 
 		$_config = new \Opencart\System\Engine\Config();
 		$_config->addPath( DIR_EXTENSION . 'opencart_gopay/system/config/' );
@@ -96,9 +85,14 @@ class GoPay extends \Opencart\System\Engine\Controller
 	{
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 
+		$data = $this->model_setting_setting->getSetting( 'payment_gopay' );
+		foreach ( $this->request->post as $key => $value ) {
+			$data[ $key ] = $value;
+		}
+
 		if ( $this->user->hasPermission( 'modify', 'extension/opencart_gopay/payment/gopay' ) ) {
 			$this->load->model( 'setting/setting' );
-			$this->model_setting_setting->editSetting( 'payment_gopay', $this->request->post );
+			$this->model_setting_setting->editSetting( 'payment_gopay', $data );
 			$data['success'] = $this->language->get( 'text_success' );
 		} else {
 			$data['error'] = $this->language->get( 'error_permission' );
@@ -106,5 +100,53 @@ class GoPay extends \Opencart\System\Engine\Controller
 
 		$this->response->addHeader( 'Content-Type: application/json' );
 		$this->response->setOutput( json_encode( $data ) );
+	}
+
+	/**
+	 * Process admin options.
+	 *
+	 * @return bool
+	 * @since  1.0.0
+	 */
+	public function process_admin_options(): bool {
+		require_once( DIR_EXTENSION . '/opencart_gopay/includes/opencartGopayApi.php' );
+		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
+
+		// Check credentials (GoID, Client ID and Client Secret).
+		if ( empty( $this->config->get( 'payment_gopay_goid' ) ) ||
+			empty( $this->config->get( 'payment_gopay_client_id' ) ) ||
+			empty( $this->config->get( 'payment_gopay_client_secret' ) )
+		) {
+			return false;
+		} else {
+			if ( array_key_exists( 'payment_gopay_test', $options ) ) {
+				$gopay = \OpencartGopayApi::auth_gopay( $options );
+
+				$response = $gopay->getPaymentInstruments(
+					$this->config->get( 'payment_gopay_goid' ), 'CZK' );
+
+				if ( !$response->hasSucceed() ) {
+					if ( array_key_exists( 'errors', $response->json ) &&
+						$response->json['errors'][0]['error_name'] == 'INVALID' ) {
+						$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_goid', '' );
+
+						return false;
+					}
+				}
+
+				$response = $gopay->getAuth()->authorize()->response;
+				if ( array_key_exists( 'errors', $response->json ) &&
+					$response->json['errors'][0]['error_name'] == 'AUTH_WRONG_CREDENTIALS' ) {
+					$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_client_id', '' );
+					$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_client_secret', '' );
+
+					return false;
+				}
+
+			}
+		}
+		// END.
+
+		return true;
 	}
 }
