@@ -65,8 +65,16 @@ class GoPay extends \Opencart\System\Engine\Controller
 		# Check GoPay credentials and load options
 		$this->process_admin_options();
 		$data = array_merge( $data, $this->model_setting_setting->getSetting( 'payment_gopay' ) );
-		$data['payment_gopay_test'] = array_key_exists( 'payment_gopay_test', $data ) &&
+		$data['payment_gopay_test']        = array_key_exists( 'payment_gopay_test', $data ) &&
 									is_numeric( $data['payment_gopay_test'] ) ? $data['payment_gopay_test'] : 1;
+		if ( ! empty( $this->config->get( 'payment_gopay_goid' ) ) &&
+			! empty( $this->config->get( 'payment_gopay_client_id' ) ) &&
+			! empty( $this->config->get( 'payment_gopay_client_secret' ) ) ) {
+			$data['payment_gopay_title']       = array_key_exists( 'payment_gopay_title', $data ) ?
+				$data['payment_gopay_title'] : 'GoPay';
+			$data['payment_gopay_description'] = array_key_exists( 'payment_gopay_description', $data ) ?
+				$data['payment_gopay_description'] : 'Payment via GoPay gateway';
+		}
 		# End GoPay load
 
 		$_config = new \Opencart\System\Engine\Config();
