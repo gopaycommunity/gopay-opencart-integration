@@ -65,7 +65,8 @@ class GoPay extends \Opencart\System\Engine\Controller
 		# Check GoPay credentials and load options
 		$this->process_admin_options();
 		$data = array_merge( $data, $this->model_setting_setting->getSetting( 'payment_gopay' ) );
-		$data['payment_gopay_test'] = is_numeric( $data['payment_gopay_test'] ) ? $data['payment_gopay_test'] : 1;
+		$data['payment_gopay_test'] = array_key_exists( 'payment_gopay_test', $data ) &&
+									is_numeric( $data['payment_gopay_test'] ) ? $data['payment_gopay_test'] : 1;
 		# End GoPay load
 
 		$_config = new \Opencart\System\Engine\Config();
@@ -112,6 +113,12 @@ class GoPay extends \Opencart\System\Engine\Controller
 		require_once( DIR_EXTENSION . '/opencart_gopay/includes/opencartGopayApi.php' );
 		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
 
+		// Check payment methods and banks enabled on GoPay account.
+		if ( ! empty( $this->config->get( 'payment_gopay_goid' ) ) &&
+			 ! empty( $this->config->get( 'payment_gopay_test' ) ) ) {
+			$this->check_enabled_on_gopay();
+		}
+
 		// Check credentials (GoID, Client ID and Client Secret).
 		if ( empty( $this->config->get( 'payment_gopay_goid' ) ) ||
 			empty( $this->config->get( 'payment_gopay_client_id' ) ) ||
@@ -148,5 +155,51 @@ class GoPay extends \Opencart\System\Engine\Controller
 		// END.
 
 		return true;
+	}
+
+	/**
+	 * Check payment methods and banks that
+	 * are enabled on GoPay account.
+	 *
+	 * @since 1.0.0
+	 */
+	public function check_enabled_on_gopay() {
+		require_once( DIR_EXTENSION . '/opencart_gopay/includes/opencartGopayApi.php' );
+		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
+
+		$payment_methods = array();
+		$banks           = array();
+
+		$_config = new \Opencart\System\Engine\Config();
+		$_config->addPath( DIR_EXTENSION . 'opencart_gopay/system/config/' );
+		$_config->load( 'gopay' );
+
+		$setting = $_config->get( 'gopay_setting' );
+
+		foreach ( $setting['currencies'] as $currency => $value ) {
+			$supported       = \OpencartGopayApi::check_enabled_on_gopay( $currency, $options );
+			$payment_methods = $payment_methods + $supported[0];
+			$banks           = $banks + $supported[1];
+
+			$this->model_setting_setting->editValue( 'payment_gopay',
+				'payment_gopay_payment_methods_' . $currency, $supported[0] );
+			$this->model_setting_setting->editValue( 'payment_gopay',
+				'payment_gopay_banks_' . $currency, $supported[1] );
+		}
+
+		if ( ! empty( $payment_methods ) ) {
+			$options['payment_gopay_option_payment_methods'] = $payment_methods;
+		}
+		if ( ! empty( $banks ) ) {
+			if ( array_key_exists( 'OTHERS', $banks ) ) {
+				// Send 'Others' to the end.
+				$other = $banks['OTHERS'];
+				unset( $banks['OTHERS'] );
+				$banks['OTHERS'] = $other;
+			}
+			$options['payment_gopay_option_banks'] = $banks;
+		}
+
+		$this->model_setting_setting->editSetting( 'payment_gopay', $options );
 	}
 }

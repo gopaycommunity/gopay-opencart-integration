@@ -44,4 +44,42 @@ class OpencartGopayApi {
 			)
 		);
 	}
+
+	/**
+	 * Check payment methods and banks that
+	 * are enabled on GoPay account.
+	 *
+	 * @param string $currency Currency.
+	 * @param array  $options  Setting options.
+	 * @return array
+	 * @since  1.0.0
+	 */
+	public static function check_enabled_on_gopay( string $currency, $options ): array {
+		$gopay   = self::auth_gopay( $options );
+
+		$payment_methods  = array();
+		$banks            = array();
+		$enabled_payments = $gopay->getPaymentInstruments( $options['payment_gopay_goid'], $currency );
+
+		if ( 200 == $enabled_payments->statusCode ) {
+			foreach ( $enabled_payments->json['enabledPaymentInstruments'] as $key => $payment_method ) {
+				$payment_methods[ $payment_method['paymentInstrument'] ] = array(
+					'label' => $payment_method['label']['cs'],
+					'image' => $payment_method['image']['normal'],
+				);
+
+				if ( 'BANK_ACCOUNT' === $payment_method['paymentInstrument'] ) {
+					foreach ( $payment_method['enabledSwifts'] as $bank ) {
+						$banks[ $bank['swift'] ] = array(
+							'label'   => $bank['label']['cs'],
+							'country' => 'OTHERS' !== $bank['swift'] ? substr( $bank['swift'], 4, 2 ) : '',
+							'image'   => $bank['image']['normal'],
+						);
+					}
+				}
+			}
+		}
+
+		return array( $payment_methods, $banks );
+	}
 }
