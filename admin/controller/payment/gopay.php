@@ -130,7 +130,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 	 * @since  1.0.0
 	 */
 	public function process_admin_options(): bool {
-		require_once( DIR_EXTENSION . '/opencart_gopay/includes/opencartGopayApi.php' );
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
 
 		// Check payment methods and banks enabled on GoPay account.
@@ -147,7 +147,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 			return false;
 		} else {
 			if ( array_key_exists( 'payment_gopay_test', $options ) ) {
-				$gopay = \OpencartGopayApi::auth_gopay( $options );
+				$gopay = \GoPay_API::auth_gopay( $options );
 
 				$response = $gopay->getPaymentInstruments(
 					$this->config->get( 'payment_gopay_goid' ), 'CZK' );
@@ -184,7 +184,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 	 * @since 1.0.0
 	 */
 	public function check_enabled_on_gopay() {
-		require_once( DIR_EXTENSION . '/opencart_gopay/includes/opencartGopayApi.php' );
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
 
 		$payment_methods = array();
@@ -197,7 +197,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$setting = $_config->get( 'gopay_setting' );
 
 		foreach ( $setting['currencies'] as $currency => $value ) {
-			$supported       = \OpencartGopayApi::check_enabled_on_gopay( $currency, $options );
+			$supported       = \GoPay_API::check_enabled_on_gopay( $currency, $options );
 			$payment_methods = $payment_methods + $supported[0];
 			$banks           = $banks + $supported[1];
 
