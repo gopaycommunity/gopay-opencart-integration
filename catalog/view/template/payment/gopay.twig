@@ -8,3 +8,14 @@
         </div>
     </form>
 </fieldset>
+<script type="text/javascript">
+    var applePayAvailable = false;
+    if(window.ApplePaySession && window.ApplePaySession.canMakePayments()) {
+        applePayAvailable = true;
+    }
+
+    var applePay = document.getElementsByName('APPLE_PAY');
+    if (applePay.length !== 0 && !applePayAvailable) {
+        applePay[0].remove();
+    }
+</script>
