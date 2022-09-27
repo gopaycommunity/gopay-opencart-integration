@@ -89,19 +89,6 @@ class GoPay extends \Opencart\System\Engine\Controller {
             $checked = '';
         }
 
-		// Check if Apple pay is available.
-//		<script>
-//            var applePayAvailable = false;
-//            if(window.ApplePaySession && window.ApplePaySession.canMakePayments()) {
-//                applePayAvailable = true;
-//            }
-//
-//            var applePay = document.getElementsByName('APPLE_PAY');
-//            if (applePay.length !== 0 && !applePayAvailable) {
-//                applePay[0].remove();
-//            }
-//		</script>
-
 		return $enabled_payment_methods;
 	}
 
