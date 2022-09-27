@@ -119,7 +119,7 @@
                             <label for="input-default_language" class="col-sm-2 col-form-label">{{ gopay_default_language }}</label>
                             <div class="col-sm-10">
                                 <select name="payment_gopay_default_language" id="input-default_language" title="{{ gopay_default_language_tooltip }}" class="form-select">
-                                    {% for code, currency in setting['currencies'] %}
+                                    {% for code, currency in currencies %}
                                         {% if code == payment_gopay_default_language %}
                                             <option value="{{ code }}" selected="selected">{{ currency }}</option>
                                         {% else %}
@@ -171,11 +171,11 @@
                             <label for="input-payment_methods" class="col-sm-2 col-form-label">{{ gopay_payment_methods }}</label>
                             <div class="col-sm-10">
                                 <select name="payment_gopay_payment_methods[]" id="input-payment_methods" title="{{ gopay_payment_methods_tooltip }}" class="form-select" multiple>
-                                    {% for code, payment_method in setting['payment_methods'] %}
+                                    {% for code, payment_method in payment_methods %}
                                         {% if code in payment_gopay_payment_methods %}
-                                            <option value="{{ code }}" selected="selected">{{ payment_method }}</option>
+                                            <option value="{{ code }}" selected="selected">{{ payment_method['label'] }}</option>
                                         {% else %}
-                                            <option value="{{ code }}">{{ payment_method }}</option>
+                                            <option value="{{ code }}">{{ payment_method['label'] }}</option>
                                         {% endif %}
                                     {% endfor %}
                                 </select>
@@ -185,11 +185,11 @@
                             <label for="input-banks" class="col-sm-2 col-form-label">{{ gopay_banks }}</label>
                             <div class="col-sm-10">
                                 <select name="payment_gopay_banks[]" id="input-banks" title="{{ gopay_banks_tooltip }}" class="form-select" multiple>
-                                    {% for code, bank in setting['banks'] %}
+                                    {% for code, bank in banks %}
                                         {% if code in payment_gopay_banks %}
-                                            <option value="{{ code }}" selected="selected">{{ bank }}</option>
+                                            <option value="{{ code }}" selected="selected">{{ bank['label'] }} {{ bank['country'] }}</option>
                                         {% else %}
-                                            <option value="{{ code }}">{{ bank }}</option>
+                                            <option value="{{ code }}">{{ bank['label'] }} {{ bank['country'] }}</option>
                                         {% endif %}
                                     {% endfor %}
                                 </select>

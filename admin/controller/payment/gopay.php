@@ -81,7 +81,19 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$_config->addPath( DIR_EXTENSION . 'opencart_gopay/system/config/' );
 		$_config->load( 'gopay' );
 
-		$data['setting'] = $_config->get( 'gopay_setting' );
+		$data['currencies'] = $_config->get( 'gopay_setting' )['currencies'];
+		$data['payment_methods'] = $_config->get( 'gopay_setting' )['payment_methods'];
+		$data['banks'] = $_config->get( 'gopay_setting' )['banks'];
+
+		# Load payment methods and banks enabled on GoPay
+		$payment_methods_key     = 'payment_gopay_option_payment_methods';
+		$data['payment_methods'] = ! empty( $data ) && array_key_exists( $payment_methods_key, $data ) &&
+					! empty( $data[ $payment_methods_key ] ) ? $data[ $payment_methods_key ] : $data['payment_methods'];
+
+		$banks_key     = 'payment_gopay_option_banks';
+		$data['banks'] = ! empty( $data ) && array_key_exists( $banks_key, $data ) &&
+		! empty( $data[ $banks_key ] ) ? $data[ $banks_key ] : $data['banks'];
+		# End load payment methods and banks enabled on GoPay
 
 		$data['header']      = $this->load->controller( 'common/header' );
 		$data['column_left'] = $this->load->controller( 'common/column_left' );
