@@ -189,10 +189,8 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$payment_methods = $payment_methods + $supported[0];
 			$banks           = $banks + $supported[1];
 
-			$this->model_setting_setting->editValue( 'payment_gopay',
-				'payment_gopay_payment_methods_' . $currency, $supported[0] );
-			$this->model_setting_setting->editValue( 'payment_gopay',
-				'payment_gopay_banks_' . $currency, $supported[1] );
+			$options['payment_gopay_payment_methods_' . $currency] = $supported[0];
+			$options['payment_gopay_banks_' . $currency] = $supported[1];
 		}
 
 		if ( ! empty( $payment_methods ) ) {

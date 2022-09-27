@@ -46,5 +46,5 @@ $_['gopay_payment_methods_tooltip']   = 'Enable only the selected payment method
 $_['gopay_banks_tooltip']             = 'Enable only the selected banks on the GoPay payment gateway.';
 $_['gopay_payment_retry_tooltip']     = 'If enabled, payment retry of a failed payment will be done using the same payment method that was selected when customer was placing an order.';
 
-// Error
+# Error
 $_['error_permission']                = 'You need permission to modify payment GoPay!';
