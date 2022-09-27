@@ -1,0 +1,14 @@
+/*
+	Theme Name: Payment methods
+	Version: 1.0.0
+*/
+
+.payment_method_oc_gopay_gateway_selection {
+    border-bottom: 1px dashed;
+    padding: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+    font-size: 15px;
+}
