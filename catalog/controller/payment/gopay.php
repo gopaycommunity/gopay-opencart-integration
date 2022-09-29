@@ -2,11 +2,20 @@
 namespace Opencart\Catalog\Controller\Extension\OpencartGopay\Payment;
 class GoPay extends \Opencart\System\Engine\Controller {
 	public function index(): string {
-		$this->document->addStyle( 'extension/opencart_gopay/catalog/view/assets/css/payment_methods.css' );
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 		$this->load->model('setting/extension');
 
-		$data['payment_fields'] = $this->payment_fields();
+		$data['payment_fields']            = $this->payment_fields();
+		$data['payment_gopay_description'] = $this->model_setting_setting->getValue( 'payment_gopay_description' );
+
+		$data['language'] = $this->config->get( 'config_language' );
+
+		$test = $this->model_setting_setting->getValue( 'payment_gopay_test' );
+		if ( $test ) {
+			$data['embed'] = 'https://gw.sandbox.gopay.com/gp-gw/js/embed.js';
+		} else {
+			$data['embed'] = 'https://gate.gopay.cz/gp-gw/js/embed.js';
+		}
 
 		return $this->load->view( 'extension/opencart_gopay/payment/gopay', $data );
 	}
@@ -92,6 +101,81 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		return $enabled_payment_methods;
 	}
 
-	public function confirm(): void {
+	/**
+	 * Get items info
+	 *
+	 * @param float $currency_value  currency value.
+	 *
+	 * @return array
+	 * @since 1.0.0
+	 */
+	private function get_items( float $currency_value ): array
+	{
+
+		$items = array();
+		foreach ( $this->cart->getProducts() as $item ) {
+
+			if ( $item['tax_class_id'] ) {
+				$tax_rate = array_values( $this->tax->getRates( $item['price'], $item['tax_class_id'] ) )[0]['rate'];
+			}
+
+			$items[] = array(
+				'type'        => 'ITEM',
+				'name'        => $item['name'],
+				'product_url' => $this->url->link('product/product', 'language=' .
+					$this->config->get('config_language') . '&product_id=' . $item['product_id']),
+				'amount'      => $item['total'] * $currency_value,
+				'count'       => $item['quantity'],
+				'vat_rate'    => $tax_rate ? (int)$tax_rate : 0,
+			);
+		}
+
+		return $items;
+	}
+
+	public function create_payment(): void {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
+		$this->load->model( 'checkout/order' );
+
+		$data = [];
+
+		if ( !isset( $this->session->data['order_id'] ) ) {
+			$data['error']['warning'] = $this->language->get( 'error_order' );
+		}
+
+		$order_id             = $this->session->data['order_id'];
+		$order                = $this->model_checkout_order->getOrder( $order_id );
+		$currency_value       = $this->currency->getValue( $this->session->data['currency'] );
+		$gopay_payment_method = $this->request->post['gopay_payment_method'];
+		$options              = $this->model_setting_setting->getSetting( 'payment_gopay' );
+		$items                = $this->get_items( $currency_value );
+
+		$callback = array(
+			'return_url'       => $this->url->link( 'checkout/success',
+				'language=' . $this->config->get( 'config_language' ) ),
+			'notification_url' => $this->url->link( 'extension/opencart_gopay/payment/gopay',
+				'language=' . $this->config->get( 'config_language' ) ),
+		);
+
+		$response = \GoPay_API::create_payment(
+			$gopay_payment_method,
+			$order,
+			'',
+			$options,
+			$items,
+			$callback,
+			$currency_value
+		);
+
+		if ( $response->statusCode != 200 ) {
+			$data['failure'] = $this->url->link( 'checkout/failure', 'language=' . $this->config->get('config_language'),
+				true );
+		} else {
+			$data['gw_url'] = $response->json['gw_url'];
+		}
+
+		$this->response->addHeader( 'Content-Type: application/json' );
+		$this->response->setOutput( json_encode( $data ) );
 	}
 }

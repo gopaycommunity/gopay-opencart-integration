@@ -1,6 +1,17 @@
+<style>
+    .payment_method_oc_gopay_gateway_selection {
+        border-bottom: 1px dashed;
+        padding: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+        font-size: 15px;
+    }
+</style>
+<script type="text/javascript" src="{{ embed }}"></script>
 <fieldset>
-    <legend>{{ text_title }}</legend>
-    <p><b>{{ text_description }}</b></p>
+    <p style="font-size: 15px;"><b>{{ payment_gopay_description }}</b></p>
     <form id="form-gopay">
         {{ payment_fields }}
         <div class="d-inline-block pt-2 pd-2 w-100 text-end">
@@ -18,4 +29,37 @@
     if (applePay.length !== 0 && !applePayAvailable) {
         applePay[0].remove();
     }
+
+    $('#form-gopay').on('submit', function (e) {
+        e.preventDefault();
+        var element = this;
+
+        $.ajax({
+            url: 'index.php?route=extension/opencart_gopay/payment/gopay|create_payment&language={{ language }}',
+            type: 'post',
+            data: $('#form-gopay').serialize(),
+            dataType: 'json',
+            contentType: 'application/x-www-form-urlencoded',
+            cache: false,
+            processData: false,
+            async: false,
+            beforeSend: function () {
+                $('#button-confirm').prop('disabled', true).addClass('loading');
+            },
+            success: function (json) {
+                $('#form-gopay .alert').remove();
+                $('#form-gopay .lds-spinner').addClass('d-none');
+
+                if (json['gw_url']) {
+                    _gopay.checkout({gatewayUrl: json['gw_url'], inline: true});
+                }
+                if (json['failure']) {
+                    location = json['failure'];
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+            }
+        });
+    });
 </script>

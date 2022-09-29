@@ -4,7 +4,7 @@ class GoPay extends \Opencart\System\Engine\Model {
 	public function getMethod( array $address ): array {
 		return $this->is_available() ? [
 			'code'       => 'gopay',
-			'title'      => 'GoPay',
+			'title'      => $this->model_setting_setting->getValue( 'payment_gopay_title' ),
 			'sort_order' => 6
 		] : [];
 	}
