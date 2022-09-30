@@ -214,4 +214,44 @@ class GoPay_API {
 
 		return $response;
 	}
+
+	/**
+	 * Check payment status
+	 *
+	 * @param string $gopay_transaction_id GoPay transaction id.
+	 * @param string $order_id             Order id.
+	 * @param object $controller           GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function check_payment_status( $gopay_transaction_id, $order_id, $controller ) {
+		$options  = $controller->model_setting_setting->getSetting( 'payment_gopay' );
+		$gopay    = self::auth_gopay( $options );
+		$response = $gopay->getStatus( $gopay_transaction_id );
+		$order    = $controller->model_checkout_order->getOrder( (int)$order_id );
+
+		if ( 200 != $response->statusCode ) {
+			return;
+		}
+
+		switch ( $response->json['state'] ) {
+			case 'PAID':
+				$order_status_id = 2;
+				break;
+			case 'PAYMENT_METHOD_CHOSEN':
+			case 'AUTHORIZED':
+				$order_status_id = 1;
+				break;
+			case 'CREATED':
+			case 'TIMEOUTED':
+			case 'CANCELED':
+				$order_status_id = 10;
+				break;
+			case 'REFUNDED':
+				$order_status_id = 11;
+				break;
+		}
+
+		$controller->model_checkout_order->addHistory( $order_id, $order_status_id, '', true );
+	}
 }

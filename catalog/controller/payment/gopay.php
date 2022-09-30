@@ -2,6 +2,8 @@
 namespace Opencart\Catalog\Controller\Extension\OpencartGopay\Payment;
 class GoPay extends \Opencart\System\Engine\Controller {
 	public function index(): string {
+		$this->webhook();
+
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 		$this->load->model('setting/extension');
 
@@ -152,10 +154,14 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		$items                = $this->get_items( $currency_value );
 
 		$callback = array(
-			'return_url'       => $this->url->link( 'checkout/success',
-				'language=' . $this->config->get( 'config_language' ) ),
-			'notification_url' => $this->url->link( 'extension/opencart_gopay/payment/gopay',
-				'language=' . $this->config->get( 'config_language' ) ),
+			'return_url'       => html_entity_decode( $this->url->link( 'extension/opencart_gopay/payment/gopay',
+				array( 'language' => $this->config->get( 'config_language' ),
+					'gopay-api' => 'oc_gopay_gateway_return',
+					'order_id'  => $order_id ) ) ),
+			'notification_url' => html_entity_decode( $this->url->link( 'extension/opencart_gopay/payment/gopay',
+				array( 'language' => $this->config->get( 'config_language' ),
+					'gopay-api' => 'oc_gopay_gateway_notification',
+					'order_id'  => $order_id ) ) ),
 		);
 
 		$response = \GoPay_API::create_payment(
@@ -172,10 +178,24 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$data['failure'] = $this->url->link( 'checkout/failure', 'language=' . $this->config->get('config_language'),
 				true );
 		} else {
+			$this->model_checkout_order->editTransactionId( $order_id, $response->json['id'] );
 			$data['gw_url'] = $response->json['gw_url'];
 		}
 
 		$this->response->addHeader( 'Content-Type: application/json' );
 		$this->response->setOutput( json_encode( $data ) );
+	}
+
+	public function webhook() {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
+
+		$gopay_api      = filter_input( INPUT_GET, 'gopay-api' );
+		$transaction_id = filter_input( INPUT_GET, 'id' );
+		$order_id       = filter_input( INPUT_GET, 'order_id' );
+
+		if ( $gopay_api && $transaction_id ) {
+			\GoPay_API::check_payment_status( $transaction_id, $order_id, $this );
+		}
 	}
 }
