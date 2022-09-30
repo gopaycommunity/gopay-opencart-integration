@@ -225,10 +225,11 @@ class GoPay_API {
 	 * @since  1.0.0
 	 */
 	public static function check_payment_status( $gopay_transaction_id, $order_id, $controller ) {
+		$controller->load->model( 'checkout/order' );
+
 		$options  = $controller->model_setting_setting->getSetting( 'payment_gopay' );
 		$gopay    = self::auth_gopay( $options );
 		$response = $gopay->getStatus( $gopay_transaction_id );
-		$order    = $controller->model_checkout_order->getOrder( (int)$order_id );
 
 		if ( 200 != $response->statusCode ) {
 			return;
@@ -236,22 +237,24 @@ class GoPay_API {
 
 		switch ( $response->json['state'] ) {
 			case 'PAID':
-				$order_status_id = 2;
+			case 'AUTHORIZED':
+				$controller->model_checkout_order->addHistory( $order_id, 2, '', true );
+				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
+
 				break;
 			case 'PAYMENT_METHOD_CHOSEN':
-			case 'AUTHORIZED':
-				$order_status_id = 1;
-				break;
 			case 'CREATED':
 			case 'TIMEOUTED':
 			case 'CANCELED':
-				$order_status_id = 10;
+				$controller->model_checkout_order->addHistory( $order_id, 10, '', true );
+				$controller->response->redirect( $controller->url->link( 'checkout/failure', '', 'SSL' ) );
+
 				break;
 			case 'REFUNDED':
-				$order_status_id = 11;
+				$controller->model_checkout_order->addHistory( $order_id, 11, '', true );
+				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
+
 				break;
 		}
-
-		$controller->model_checkout_order->addHistory( $order_id, $order_status_id, '', true );
 	}
 }
