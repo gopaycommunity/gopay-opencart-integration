@@ -14,12 +14,17 @@
     <p style="font-size: 15px;"><b>{{ payment_gopay_description }}</b></p>
     <form id="form-gopay">
         {{ payment_fields }}
+        <div id="form-gopay-message" class="alert alert-warning">
+            <i class="fa-solid fa-circle-check"></i>
+            GoPay payment gateway plugin disabled for selected Country!
+        </div>
         <div class="d-inline-block pt-2 pd-2 w-100 text-end">
             <button type="submit" id="button-confirm" class="btn btn-primary">{{ button_confirm }}</button>
         </div>
     </form>
 </fieldset>
 <script type="text/javascript">
+    // Check Apple pay
     var applePayAvailable = false;
     if(window.ApplePaySession && window.ApplePaySession.canMakePayments()) {
         applePayAvailable = true;
@@ -28,6 +33,23 @@
     var applePay = document.getElementsByName('APPLE_PAY');
     if (applePay.length !== 0 && !applePayAvailable) {
         applePay[0].remove();
+    }
+
+    // Check country and disable button
+    var country = document.getElementById('input-shipping-country');
+    var code = country.value;
+    var countries = {{ countries|json_encode|raw }};
+    console.log(countries);
+
+    for (var i = 0; i < countries.length; i++) {
+        if ( parseInt( countries[i]['country_id'] ) === parseInt( code ) ) {
+            $('#button-confirm').prop('disabled', false);
+            $('#form-gopay-message').hide();
+            break;
+        } else {
+            $('#button-confirm').prop('disabled', true);
+            $('#form-gopay-message').show();
+        }
     }
 
     $('#form-gopay').on('submit', function (e) {
