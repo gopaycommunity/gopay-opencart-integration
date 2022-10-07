@@ -19,6 +19,10 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$data['embed'] = 'https://gate.gopay.cz/gp-gw/js/embed.js';
 		}
 
+		$data['countries'] = $this->db->query( "SELECT country_id FROM `" . DB_PREFIX .
+			('country` WHERE `iso_code_3` in ("') .
+			implode( '", "', $this->config->get( 'payment_gopay_countries' ) ) . '")' )->rows;
+
 		return $this->load->view( 'extension/opencart_gopay/payment/gopay', $data );
 	}
 
@@ -118,14 +122,18 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		foreach ( $this->cart->getProducts() as $item ) {
 
 			if ( $item['tax_class_id'] ) {
-				$tax_rate = array_values( $this->tax->getRates( $item['price'], $item['tax_class_id'] ) )[0]['rate'];
+				$rates    = $this->tax->getRates( $item['price'], $item['tax_class_id'] );
+				$tax_rate = 0;
+				if ( $rates ) {
+					$tax_rate = array_values( $rates )[0]['rate'];
+				}
 			}
 
 			$items[] = array(
 				'type'        => 'ITEM',
 				'name'        => $item['name'],
-				'product_url' => $this->url->link('product/product', 'language=' .
-					$this->config->get('config_language') . '&product_id=' . $item['product_id']),
+				'product_url' => $this->url->link( 'product/product', 'language=' .
+					$this->config->get('config_language') . '&product_id=' . $item['product_id'] ),
 				'amount'      => $item['total'] * $currency_value,
 				'count'       => $item['quantity'],
 				'vat_rate'    => $tax_rate ? (int)$tax_rate : 0,
@@ -145,6 +153,11 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		if ( !isset( $this->session->data['order_id'] ) ) {
 			$data['error']['warning'] = $this->language->get( 'error_order' );
 		}
+
+		$address = $this->request->post;
+		$address = array_merge( $address, $this->db->query( "SELECT DISTINCT * FROM `" . DB_PREFIX .
+			"country` WHERE `country_id` = '" . (int) $address['shipping_country_id'] . "'" )->row );
+		$address['telephone'] = '';
 
 		$order_id             = $this->session->data['order_id'];
 		$order                = $this->model_checkout_order->getOrder( $order_id );
@@ -171,7 +184,8 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$options,
 			$items,
 			$callback,
-			$currency_value
+			$currency_value,
+			$address
 		);
 
 		if ( $response->statusCode != 200 ) {
