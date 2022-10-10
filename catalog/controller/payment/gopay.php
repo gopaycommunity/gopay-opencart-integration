@@ -154,11 +154,6 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$data['error']['warning'] = $this->language->get( 'error_order' );
 		}
 
-		$address = $this->request->post;
-		$address = array_merge( $address, $this->db->query( "SELECT DISTINCT * FROM `" . DB_PREFIX .
-			"country` WHERE `country_id` = '" . (int) $address['shipping_country_id'] . "'" )->row );
-		$address['telephone'] = '';
-
 		$order_id             = $this->session->data['order_id'];
 		$order                = $this->model_checkout_order->getOrder( $order_id );
 		$currency_value       = $this->currency->getValue( $this->session->data['currency'] );
@@ -185,7 +180,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$items,
 			$callback,
 			$currency_value,
-			$address
+			$this->session->data
 		);
 
 		if ( $response->statusCode != 200 ) {

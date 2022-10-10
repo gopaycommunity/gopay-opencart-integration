@@ -93,13 +93,15 @@ class GoPay_API {
 	 * @param array    $items                list of products.
 	 * @param array    $callback             callback links.
 	 * @param float    $currency_value       currency value.
+	 * @param array    $data                 Customer address.
 	 *
 	 * @return Response
 	 * @since 1.0.0
 	 */
 	public static function create_payment( ?string $gopay_payment_method, array $order,
 	                                       string $end_date, array $options, array $items,
-	                                       array $callback, float $currency_value ) : Response {
+	                                       array $callback, float $currency_value, array $data ) : Response {
+
 		$gopay = \GoPay_API::auth_gopay( $options );
 
 		$_config = new \Opencart\System\Engine\Config();
@@ -130,14 +132,14 @@ class GoPay_API {
 		}
 
 		$contact = array(
-			'first_name'   => $order['shipping_firstname'],
-			'last_name'    => $order['shipping_lastname'],
-			'email'        => $order['email'],
-			'phone_number' => $order['telephone'],
-			'city'         => $order['shipping_city'],
-			'street'       => $order['shipping_address_1'],
-			'postal_code'  => $order['shipping_postcode'],
-			'country_code' => $order['shipping_iso_code_3'],
+			'first_name'   => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['firstname'] : $order['shipping_firstname'],
+			'last_name'    => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['lastname'] : $order['shipping_lastname'],
+			'city'         => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['city'] : $order['shipping_city'],
+			'street'       => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['address_1'] : $order['shipping_address_1'],
+			'postal_code'  => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['postcode'] : $order['shipping_postcode'],
+			'country_code' => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['iso_code_3'] : $order['shipping_iso_code_3'],
+			'email'        => array_key_exists( 'customer', $data ) ? $data['customer']['email'] : $order['email'],
+			'phone_number' => array_key_exists( 'customer', $data ) ? $data['customer']['telephone'] : $order['telephone'],
 		);
 
 		if ( !empty( $default_payment_instrument ) ) {
@@ -159,10 +161,17 @@ class GoPay_API {
 		$additional_params = array(
 			array(
 				'name'  => 'order_id',
-				'value' => $order['order_id'],
+				'value' => array_key_exists( 'order_id', $data ) ? $data['order_id'] : $order['order_id'],
 			) );
 
-		$language = $country_to_language[ $order['shipping_iso_code_2'] ];
+		$language = 'EN';
+		if ( array_key_exists( 'shipping_address', $data ) ) {
+			$language = $country_to_language[ $data['shipping_address']['iso_code_2'] ];
+		} else {
+			if ( $order['shipping_iso_code_2'] != '' ) {
+				$language = $country_to_language[ $order['shipping_iso_code_2'] ];
+			}
+		}
 		if ( !array_key_exists( $language, $languages ) ) {
 			$language = $options['payment_gopay_default_language'];
 		}
@@ -171,8 +180,8 @@ class GoPay_API {
 		$data  = array(
 			'payer'             => $payer,
 			'amount'            => $total,
-			'currency'          => $order['currency_code'],
-			'order_number'      => $order['order_id'],
+			'currency'          => array_key_exists( 'currency', $data ) ? $data['currency'] : $order['currency_code'],
+			'order_number'      => array_key_exists( 'order_id', $data ) ? $data['order_id'] : $order['order_id'],
 			'order_description' => 'order',
 			'items'             => $items,
 			'additional_params' => $additional_params,
@@ -238,7 +247,25 @@ class GoPay_API {
 		switch ( $response->json['state'] ) {
 			case 'PAID':
 			case 'AUTHORIZED':
-				$controller->model_checkout_order->addHistory( $order_id, 2, '', true );
+				$products = $controller->db->query("SELECT * FROM `" . DB_PREFIX .
+					"order_product` WHERE `order_id` = '" . (int)$order_id . "'");
+
+				// Check if all products are downloadable.
+				$all_virtual_downloadable = true;
+				foreach ( $products->rows as $product ) {
+					$product_to_download = $controller->db->query("SELECT * FROM `" . DB_PREFIX .
+						"product_to_download` WHERE `product_id` = '". (int)$product['product_id'] . "'");
+					if ( $product_to_download->num_rows == 0 ) {
+						$all_virtual_downloadable = false;
+						break;
+					}
+				}
+
+				if ( $all_virtual_downloadable ) {
+					$controller->model_checkout_order->addHistory( $order_id, 5, '', true );
+				} else {
+					$controller->model_checkout_order->addHistory( $order_id, 2, '', true );
+				}
 				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
 
 				break;
