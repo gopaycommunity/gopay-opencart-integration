@@ -3,6 +3,13 @@ namespace Opencart\Catalog\Model\Extension\OpencartGopay\Payment;
 class GoPay extends \Opencart\System\Engine\Model {
 	public function getMethod( array $address ): array {
 
+		if ( empty( $this->model_setting_setting->getValue( 'payment_gopay_goid' ) ) ||
+			empty( $this->model_setting_setting->getValue( 'payment_gopay_client_id' ) ) ||
+			empty( $this->model_setting_setting->getValue( 'payment_gopay_client_secret' ) )
+		) {
+			return [];
+		}
+
 		return $this->is_available() ? [
 			'code'       => 'gopay',
 			'title'      => $this->model_setting_setting->getValue( 'payment_gopay_title' ),
