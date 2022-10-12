@@ -37,14 +37,14 @@
 
     // Check country and disable button
     var country = document.getElementById('input-shipping-country');
-    var code = country;
-    if ( code != null ) {
+    var code = '';
+    if ( country ) {
         code = country.value;
     }
     var countries = {{ countries|json_encode|raw }};
 
     for (var i = 0; i < countries.length; i++) {
-        if ( parseInt( countries[i]['country_id'] ) === parseInt( code ) || code == null ) {
+        if ( !code || parseInt( countries[i]['country_id'] ) === parseInt( code ) ) {
             $('#button-confirm').prop('disabled', false);
             $('#form-gopay-message').hide();
             break;
