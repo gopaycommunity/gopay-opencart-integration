@@ -119,11 +119,11 @@
                             <label for="input-default_language" class="col-sm-2 col-form-label">{{ gopay_default_language }}</label>
                             <div class="col-sm-10">
                                 <select name="payment_gopay_default_language" id="input-default_language" title="{{ gopay_default_language_tooltip }}" class="form-select">
-                                    {% for code, currency in currencies %}
+                                    {% for code, language in languages %}
                                         {% if code == payment_gopay_default_language %}
-                                            <option value="{{ code }}" selected="selected">{{ currency }}</option>
+                                            <option value="{{ code }}" selected="selected">{{ language }}</option>
                                         {% else %}
-                                            <option value="{{ code }}">{{ currency }}</option>
+                                            <option value="{{ code }}">{{ language }}</option>
                                         {% endif %}
                                     {% endfor %}
                                 </select>
