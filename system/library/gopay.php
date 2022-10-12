@@ -132,21 +132,21 @@ class GoPay_API {
 		}
 
 		$contact = array(
-			'first_name'   => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['firstname'] : $order['shipping_firstname'],
-			'last_name'    => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['lastname'] : $order['shipping_lastname'],
+			'first_name'   => array_key_exists( 'customer', $data ) ? $data['customer']['firstname'] : $order['shipping_firstname'],
+			'last_name'    => array_key_exists( 'customer', $data ) ? $data['customer']['lastname'] : $order['shipping_lastname'],
+			'email'        => array_key_exists( 'customer', $data ) ? $data['customer']['email'] : $order['email'],
+			'phone_number' => array_key_exists( 'customer', $data ) ? $data['customer']['telephone'] : $order['telephone'],
 			'city'         => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['city'] : $order['shipping_city'],
 			'street'       => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['address_1'] : $order['shipping_address_1'],
 			'postal_code'  => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['postcode'] : $order['shipping_postcode'],
 			'country_code' => array_key_exists( 'shipping_address', $data ) ? $data['shipping_address']['iso_code_3'] : $order['shipping_iso_code_3'],
-			'email'        => array_key_exists( 'customer', $data ) ? $data['customer']['email'] : $order['email'],
-			'phone_number' => array_key_exists( 'customer', $data ) ? $data['customer']['telephone'] : $order['telephone'],
 		);
 
 		if ( !empty( $default_payment_instrument ) ) {
 			$payer = array(
 				'default_payment_instrument'  => $default_payment_instrument,
 				'allowed_payment_instruments' => $options['payment_gopay_payment_methods'],
-				//'allowed_swifts'              => $options['payment_gopay_banks'],
+				'allowed_swifts'              => $options['payment_gopay_banks'],
 				'contact'                     => $contact,
 			);
 			if ( ! empty( $default_swift ) ) {
