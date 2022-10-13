@@ -1,5 +1,7 @@
 <?php
 namespace Opencart\Admin\Controller\Extension\OpencartGopay\Payment;
+use Opencart\System\Library\Log;
+
 class GoPay extends \Opencart\System\Engine\Controller
 {
 	public function index(): void
@@ -102,6 +104,43 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->response->setOutput( $this->load->view( 'extension/opencart_gopay/payment/gopay', $data ) );
 	}
 
+	/**
+	 * Execute while installing.
+	 *
+	 * @since  1.0.0
+	 */
+	public function install(): void
+	{
+		$this->load->model( 'setting/event' );
+		$this->model_setting_event->addEvent(
+			array(
+				'code'        => 'add_gopay_to_column_left',
+				'description' => 'Create GoPay Menu',
+				'trigger'     => 'admin/view/common/column_left/before',
+				'action'      => 'extension/opencart_gopay/menu/info|menus',
+				'status'      => 1,
+				'sort_order'  => 1,
+			)
+		);
+	}
+
+	/**
+	 * Execute while uninstalling.
+	 *
+	 * @since  1.0.0
+	 */
+	public function uninstall() {
+
+		$this->load->model( 'setting/event' );
+		$this->model_setting_event->deleteEventByCode( 'add_gopay_to_column_left' );
+	}
+
+	/**
+	 * Save options.
+	 *
+	 * @return bool
+	 * @since  1.0.0
+	 */
 	public function save(): void
 	{
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
