@@ -111,6 +111,9 @@ class GoPay extends \Opencart\System\Engine\Controller
 	 */
 	public function install(): void
 	{
+		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
+		$this->model_extension_opencart_gopay_payment_gopay->create_log_table();
+
 		$this->load->model( 'setting/event' );
 		$this->model_setting_event->addEvent(
 			array(
