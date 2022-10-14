@@ -1,0 +1,76 @@
+<style>
+
+    .opencart-gopay-menu {
+        display: grid;
+        position: center;
+        text-align: center;
+        vertical-align: middle;
+        border-bottom: 1px;
+        padding: 12px;
+    }
+
+    .opencart-gopay-menu h1 {
+        font-size: xx-large;
+        font-weight: bold;
+    }
+
+    .opencart-gopay-menu table {
+        font-weight: bold;
+        margin: fill;
+        text-align: center;
+    }
+
+    .opencart-gopay-menu th {
+        font-size: 20px;
+        border-radius: 5px;
+        padding: 15px;
+        background-color: rgba(211, 221, 237, 1)
+    }
+
+    .opencart-gopay-menu td {
+        font-size: 14px;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    .opencart-gopay-menu tr:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .opencart-gopay-menu tr:nth-child(odd) {
+        background-color: rgba(211, 221, 237, 0.5);
+    }
+
+    .opencart-gopay-menu tr:hover {
+        background-color: rgba(240, 128, 128, 0.5);
+    }
+
+</style>
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="container-fluid">
+        <div class="opencart-gopay-menu">
+            <h1>PrestaShop GoPay gateway</h1>
+        </div>
+
+        <div class="opencart-gopay-menu">
+            <table>
+                <tr>
+                    <th>{{ plugin_name_header }}</th>
+                    <th>{{ version_header }}</th>
+                    <th>{{ description_header }}</th>
+                    <th>{{ author_header }}</th>
+                    <th>{{ settings }}</th>
+                </tr>
+                <tr>
+                    <td><a href="https://github.com/argo22packages/gopay-prestashop-integration">{{ plugin_name }}</a></td>
+                    <td>{{ version }}</td>
+                    <td>{{ description }}</td>
+                    <td><a href="https://www.gopay.com/">{{ author }}</a></td>
+                    <td><a href="{{ settings_page }}">{{ settings }}</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{{ footer }}
