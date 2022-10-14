@@ -117,7 +117,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 				'code'        => 'add_gopay_to_column_left',
 				'description' => 'Create GoPay Menu',
 				'trigger'     => 'admin/view/common/column_left/before',
-				'action'      => 'extension/opencart_gopay/menu/info|menus',
+				'action'      => 'extension/opencart_gopay/menu/gopay|menus',
 				'status'      => 1,
 				'sort_order'  => 1,
 			)
