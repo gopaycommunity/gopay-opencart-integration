@@ -145,6 +145,8 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
 	public function create_payment(): void {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/log.php' );
+		
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 		$this->load->model( 'checkout/order' );
 
@@ -185,7 +187,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
 		// Save log.
 		$log = array(
-			'order_id'       => $order->id,
+			'order_id'       => $order_id,
 			'transaction_id' => 200 == $response->statusCode ? $response->json['id'] : '0',
 			'message'        => 200 == $response->statusCode ? 'Payment created' :
 				'Process payment error',
