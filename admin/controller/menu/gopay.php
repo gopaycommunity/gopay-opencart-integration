@@ -30,7 +30,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$data['menus'][] = [
 				'id'       => 'menu-gopay',
 				'icon'	   => 'fas fa-cog',
-				'name'	   => 'WooCommerce GoPay gateway',
+				'name'	   => 'OpenCart GoPay gateway',
 				'href'     => '',
 				'children' => $gopay
 			];
@@ -56,5 +56,27 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$this->session->data['user_token'] );
 
 		$this->response->setOutput( $this->load->view( 'extension/opencart_gopay/menu/info', $data ) );
+	}
+
+	/**
+	 * Create log menu.
+	 *
+	 * @since  1.0.0
+	 */
+	public function log(): void {
+		$this->load->language( 'extension/opencart_gopay/menu/gopay' );
+
+		$data = array();
+
+		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
+		$data['log_page'] = $this->model_extension_opencart_gopay_payment_gopay->get_log_data();
+		$data['order_url'] = $this->url->link( 'sale/order|info',
+			'user_token=' . $this->session->data['user_token'] . '&order_id=');
+
+		$data['header']      = $this->load->controller( 'common/header' );
+		$data['column_left'] = $this->load->controller( 'common/column_left' );
+		$data['footer']      = $this->load->controller( 'common/footer' );
+
+		$this->response->setOutput( $this->load->view( 'extension/opencart_gopay/menu/log', $data ) );
 	}
 }
