@@ -3,7 +3,7 @@
  * Opencart GoPay API
  * Connect to GoPay API using the GoPay's PHP SDK
  *
- * @package   WooCommerce GoPay gateway
+ * @package   OpenCart GoPay gateway
  * @author    GoPay
  * @link      https://www.gopay.com/
  * @copyright 2022 GoPay
@@ -234,11 +234,23 @@ class GoPay_API {
 	 * @since  1.0.0
 	 */
 	public static function check_payment_status( $gopay_transaction_id, $order_id, $controller ) {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/log.php' );
 		$controller->load->model( 'checkout/order' );
 
 		$options  = $controller->model_setting_setting->getSetting( 'payment_gopay' );
 		$gopay    = self::auth_gopay( $options );
 		$response = $gopay->getStatus( $gopay_transaction_id );
+
+		// Save log.
+		$log = array(
+			'order_id'       => $order_id,
+			'transaction_id' => 200 == $response->statusCode ? $response->json['id'] : '0',
+			'message'        => 200 == $response->statusCode ? 'Checking payment status' :
+				'Error checking payment status',
+			'log_level'      => 200 == $response->statusCode ? 'INFO' : 'ERROR',
+			'log'            => $response,
+		);
+		\Log::insert_log( $controller, $log );
 
 		if ( 200 != $response->statusCode ) {
 			return;
