@@ -5,7 +5,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		$this->webhook();
 
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
-		$this->load->model('setting/extension');
+		$this->load->model( 'setting/extension' );
 
 		$data['payment_fields']            = $this->payment_fields();
 		$data['payment_gopay_description'] = $this->model_setting_setting->getValue( 'payment_gopay_description' );
@@ -182,6 +182,17 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$currency_value,
 			$this->session->data
 		);
+
+		// Save log.
+		$log = array(
+			'order_id'       => $order->id,
+			'transaction_id' => 200 == $response->statusCode ? $response->json['id'] : '0',
+			'message'        => 200 == $response->statusCode ? 'Payment created' :
+				'Process payment error',
+			'log_level'      => 200 == $response->statusCode ? 'INFO' : 'ERROR',
+			'log'            => $response,
+		);
+		\Log::insert_log( $this, $log );
 
 		if ( $response->statusCode != 200 ) {
 			$data['failure'] = $this->url->link( 'checkout/failure', 'language=' . $this->config->get('config_language'),
