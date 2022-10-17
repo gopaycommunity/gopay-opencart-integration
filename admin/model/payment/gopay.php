@@ -29,8 +29,8 @@ class GoPay extends \Opencart\System\Engine\Model {
 	 */
 	public function get_log_data() {
 
-		$pagenum          = filter_input( INPUT_GET, 'pagenum' );
-		$log_table_filter = filter_input( INPUT_GET, 'log_table_filter' );
+		$pagenum          = filter_input( INPUT_POST, 'pagenum' );
+		$log_table_filter = filter_input( INPUT_POST, 'log_table_filter' );
 
 		$rows = $this->db->query( sprintf(
 			"SELECT COUNT(*) as num_rows FROM %s%s
