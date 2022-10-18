@@ -1,5 +1,6 @@
 <?php
 namespace Opencart\Catalog\Controller\Extension\OpencartGopay\Payment;
+
 class GoPay extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$this->webhook();
@@ -184,6 +185,10 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$currency_value,
 			$this->session->data
 		);
+
+		// Clear cart and remove Order id from session to create a new one
+		unset( $this->session->data['order_id'] );
+		$this->cart->clear();
 
 		// Save log.
 		$log = array(
