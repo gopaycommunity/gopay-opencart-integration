@@ -182,6 +182,36 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		return $items;
 	}
 
+	/**
+	 * Calculate subscription end date
+	 *
+	 * @param array $products list of products
+	 * @return string|int
+	 *
+	 * @since  1.0.0
+	 */
+	private function calculate_subscription_end_date( array $products ) {
+		$end_date = '';
+		if ( $products[0]['subscription'] ) {
+			if ( $products[0]['subscription']['trial_duration'] == 0 ||
+				$products[0]['subscription']['duration'] == 0) {
+				$end_date = 0;
+			} else {
+				$trial_duration  = $products[0]['subscription']['trial_duration'] * $products[0]['subscription']['trial_cycle'];
+				$trial_strtotime = strtotime( '+' . $trial_duration . ' '
+					. $products[0]['subscription']['trial_frequency'] . ( $trial_duration > 1 ? 's' : '') );
+
+				$duration  = $products[0]['subscription']['duration'] * $products[0]['subscription']['cycle'];
+				$strtotime = strtotime( '+' . $duration . ' '
+					. $products[0]['subscription']['frequency'] . ( $duration > 1 ? 's' : ''), $trial_strtotime );
+
+				$end_date = date( 'Y-m-d', $strtotime );
+			}
+		}
+
+		return $end_date;
+	}
+
 	public function create_payment(): void {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/log.php' );
@@ -213,7 +243,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 					'order_id'  => $order_id ) ) ),
 		);
 
-		$end_date = '';
+		$end_date = $this->calculate_subscription_end_date( $this->cart->getProducts() );
 
 		$response = \GoPay_API::create_payment(
 			$gopay_payment_method,
