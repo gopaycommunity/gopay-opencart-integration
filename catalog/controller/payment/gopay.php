@@ -24,6 +24,24 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			('country` WHERE `iso_code_3` in ("') .
 			implode( '", "', $this->config->get( 'payment_gopay_countries' ) ) . '")' )->rows;
 
+
+		$products           = $this->cart->getProducts();
+		$number_of_products = count( $products );
+
+		$data['subscription_restriction'] = false;
+		if ( $number_of_products > 1 ) {
+			foreach ( $products as $product ) {
+				if ( $product['subscription'] ) {
+					$data['subscription_restriction'] = true;
+					break;
+				}
+			}
+		} else {
+			if ( $products[0]['quantity'] > 1 && $products[0]['subscription'] ) {
+				$data['subscription_restriction'] = true;
+			}
+		}
+
 		return $this->load->view( 'extension/opencart_gopay/payment/gopay', $data );
 	}
 
