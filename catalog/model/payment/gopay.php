@@ -1,5 +1,6 @@
 <?php
 namespace Opencart\Catalog\Model\Extension\OpencartGopay\Payment;
+
 class GoPay extends \Opencart\System\Engine\Model {
 	public function getMethod( array $address ): array {
 
@@ -8,6 +9,14 @@ class GoPay extends \Opencart\System\Engine\Model {
 			empty( $this->model_setting_setting->getValue( 'payment_gopay_client_secret' ) )
 		) {
 			return [];
+		}
+
+		$products = $this->cart->getProducts();
+		if ( count( $products ) == 1 && $products[0]['subscription'] ) {
+			$payment_methods = $this->model_setting_setting->getValue( 'payment_gopay_payment_methods' );
+			if ( $payment_methods && !in_array( 'PAYMENT_CARD', json_decode( $payment_methods ) ) ) {
+				return [];
+			}
 		}
 
 		return $this->is_available() ? [
