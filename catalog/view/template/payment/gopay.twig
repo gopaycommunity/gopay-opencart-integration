@@ -51,7 +51,19 @@
         } else {
             $('#button-confirm').prop('disabled', true);
             $('#form-gopay-message').show();
+            document.getElementById('form-gopay-message').innerHTML = '{{ country_restriction_message }}';
         }
+    }
+
+    // Check subscription restriction of only one subscription in the cart
+    subscription_restriction = '{{ subscription_restriction }}';
+    if ( !subscription_restriction ) {
+        $('#button-confirm').prop('disabled', false);
+        $('#form-gopay-message').hide();
+    } else {
+        $('#button-confirm').prop('disabled', true);
+        $('#form-gopay-message').show();
+        document.getElementById('form-gopay-message').innerHTML = '{{ subscription_restriction_message }}';
     }
 
     $('#form-gopay').on('submit', function (e) {
