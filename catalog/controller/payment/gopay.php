@@ -122,9 +122,9 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		$items = array();
 		foreach ( $this->cart->getProducts() as $item ) {
 
+			$tax_rate = 0;
 			if ( $item['tax_class_id'] ) {
 				$rates    = $this->tax->getRates( $item['price'], $item['tax_class_id'] );
-				$tax_rate = 0;
 				if ( $rates ) {
 					$tax_rate = array_values( $rates )[0]['rate'];
 				}
