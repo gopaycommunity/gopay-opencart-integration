@@ -189,11 +189,11 @@ class GoPay_API {
 			'lang'              => $language,
 		);
 
-//		if ( !empty( $end_date ) ) {
-//			$data['recurrence'] = array(
-//				'recurrence_cycle'      => 'ON_DEMAND',
-//				'recurrence_date_to'    => $end_date != 0 ? $end_date : date( 'Y-m-d', strtotime( '+5 years' ) ) );
-//		}
+		if ( $end_date !== '' ) {
+			$data['recurrence'] = array(
+				'recurrence_cycle'      => 'ON_DEMAND',
+				'recurrence_date_to'    => $end_date != 0 ? $end_date : date( 'Y-m-d', strtotime( '+5 years' ) ) );
+		}
 
 		$response = $gopay->createPayment( $data );
 
