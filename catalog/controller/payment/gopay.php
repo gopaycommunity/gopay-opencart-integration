@@ -24,25 +24,35 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			('country` WHERE `iso_code_3` in ("') .
 			implode( '", "', $this->config->get( 'payment_gopay_countries' ) ) . '")' )->rows;
 
+		$data['subscription_restriction'] = $this->check_subscription_restriction( $this->cart->getProducts() );
 
-		$products           = $this->cart->getProducts();
+		return $this->load->view( 'extension/opencart_gopay/payment/gopay', $data );
+	}
+
+	/**
+	 * Check subscription restriction
+	 *
+	 * @param array $products list of products
+	 * @return bool
+	 *
+	 * @since  1.0.0
+	 */
+	private function check_subscription_restriction ( array $products ) {
 		$number_of_products = count( $products );
 
-		$data['subscription_restriction'] = false;
 		if ( $number_of_products > 1 ) {
 			foreach ( $products as $product ) {
 				if ( $product['subscription'] ) {
-					$data['subscription_restriction'] = true;
-					break;
+					return true;
 				}
 			}
 		} else {
 			if ( $products[0]['quantity'] > 1 && $products[0]['subscription'] ) {
-				$data['subscription_restriction'] = true;
+				return true;
 			}
 		}
 
-		return $this->load->view( 'extension/opencart_gopay/payment/gopay', $data );
+		return  false;
 	}
 
 	/**
@@ -72,6 +82,16 @@ class GoPay extends \Opencart\System\Engine\Controller {
             )
         );
         $banks           = array_intersect_key( $supported_banks, array_flip( $selected_banks ) );
+
+		// Check if subscription - only card payment is enabled.
+		$products = $this->cart->getProducts();
+		if ( $products[0]['subscription'] ) {
+			if ( array_key_exists( 'PAYMENT_CARD', (array) $payment_methods ) ) {
+				$payment_methods = array( 'PAYMENT_CARD' => $payment_methods['PAYMENT_CARD'] );
+			} else {
+				$payment_methods = array();
+			}
+		}
 
         $input =
             '
@@ -193,10 +213,12 @@ class GoPay extends \Opencart\System\Engine\Controller {
 					'order_id'  => $order_id ) ) ),
 		);
 
+		$end_date = '';
+
 		$response = \GoPay_API::create_payment(
 			$gopay_payment_method,
 			$order,
-			'',
+			$end_date,
 			$options,
 			$items,
 			$callback,
