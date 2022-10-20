@@ -245,6 +245,24 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
 		$end_date = $this->calculate_subscription_end_date( $this->cart->getProducts() );
 
+		// Add customer payment method
+		if ( $this->customer->isLogged() ) {
+			$this->load->model( 'account/payment_method' );
+
+			$payment_method_data = [
+				'name'        => 'GoPay',
+				'image'       => '',
+				'type'        => 'gopay',
+				'extension'   => 'opencart_gopay',
+				'code'        => 'gopay',
+				'token'       => md5( rand() ),
+				'date_expire' => $end_date ? $end_date : date( 'Y-m-d H:m:s', strtotime( '+5 years' ) ),
+				'default'     => !$this->model_account_payment_method->getTotalPaymentMethods()
+			];
+
+			$this->model_account_payment_method->addPaymentMethod( $payment_method_data );
+		}
+
 		$response = \GoPay_API::create_payment(
 			$gopay_payment_method,
 			$order,
