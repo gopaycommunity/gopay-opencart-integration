@@ -89,4 +89,22 @@ class GoPay extends \Opencart\System\Engine\Model {
 
 		return true;
 	}
+
+	/**
+	 * Set customer payment id for subscription
+	 * using the order id
+	 *
+	 * @param int $order_id     order id
+	 * @param int $customer_id  customer id
+	 *
+	 * @since  1.0.0
+	 */
+	public function set_customer_payment_id( $order_id, $customer_id ): bool {
+		$customer_payments   = $this->db->query("SELECT * FROM `" . DB_PREFIX .
+			"customer_payment` WHERE `customer_id` = " . (int)$customer_id . " AND type = 'gopay';")->row;
+		$customer_payment_id = $customer_payments['customer_payment_id'];
+
+		$this->db->query( "UPDATE `" . DB_PREFIX . "subscription` SET `customer_payment_id` = " .
+			(int)$customer_payment_id . " WHERE `order_id` = " . (int)$order_id . ";" );
+	}
 }
