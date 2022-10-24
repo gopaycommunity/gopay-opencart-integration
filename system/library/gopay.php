@@ -259,18 +259,26 @@ class GoPay_API {
 		switch ( $response->json['state'] ) {
 			case 'PAID':
 			case 'AUTHORIZED':
-				$products = $controller->db->query("SELECT * FROM `" . DB_PREFIX .
-					"order_product` WHERE `order_id` = '" . (int)$order_id . "'");
+				$products     = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
+					"order_product` WHERE `order_id` = '" . (int)$order_id . "'" );
+				$subscription = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
+					"subscription` WHERE `order_id` = '" . (int)$order_id . "'" )->row;
 
 				// Check if all products are downloadable.
 				$all_virtual_downloadable = true;
 				foreach ( $products->rows as $product ) {
-					$product_to_download = $controller->db->query("SELECT * FROM `" . DB_PREFIX .
-						"product_to_download` WHERE `product_id` = '". (int)$product['product_id'] . "'");
+					$product_to_download = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
+						"product_to_download` WHERE `product_id` = '". (int)$product['product_id'] . "'" );
 					if ( $product_to_download->num_rows == 0 ) {
 						$all_virtual_downloadable = false;
 						break;
 					}
+				}
+
+				if ( $subscription ) {
+					$controller->db->query( "UPDATE `" . DB_PREFIX .
+						"subscription` SET `subscription_status_id` = '" . 2 .
+						"' WHERE `subscription_id` = '" . (int)$subscription['subscription_id'] . "'" );
 				}
 
 				if ( $all_virtual_downloadable ) {
