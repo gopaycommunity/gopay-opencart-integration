@@ -90,11 +90,12 @@ class GoPay extends \Opencart\System\Engine\Controller
 		# Load payment methods and banks enabled on GoPay
 		$payment_methods_key     = 'payment_gopay_option_payment_methods';
 		$data['payment_methods'] = ! empty( $data ) && array_key_exists( $payment_methods_key, $data ) &&
-					! empty( $data[ $payment_methods_key ] ) ? $data[ $payment_methods_key ] : $data['payment_methods'];
+					! empty( $data[ $payment_methods_key ] ) ?
+			array_intersect_key( $data['payment_methods'], $data[ $payment_methods_key ] ) : $data['payment_methods'];
 
 		$banks_key     = 'payment_gopay_option_banks';
 		$data['banks'] = ! empty( $data ) && array_key_exists( $banks_key, $data ) &&
-		! empty( $data[ $banks_key ] ) ? $data[ $banks_key ] : $data['banks'];
+		! empty( $data[ $banks_key ] ) ? array_intersect_key( $data['banks'], $data[ $banks_key ] ) : $data['banks'];
 		# End load payment methods and banks enabled on GoPay
 
 		$data['header']      = $this->load->controller( 'common/header' );
