@@ -106,12 +106,13 @@ class GoPay extends \Opencart\System\Engine\Controller
 	}
 
 	/**
-	 * Execute while installing.
+	 * Execute when installing.
 	 *
 	 * @since  1.0.0
 	 */
 	public function install(): void
 	{
+		// Create event for the menu
 		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
 		$this->model_extension_opencart_gopay_payment_gopay->create_log_table();
 
@@ -126,6 +127,11 @@ class GoPay extends \Opencart\System\Engine\Controller
 				'sort_order'  => 1,
 			)
 		);
+
+		// Create cron for recurrent payment (subscriptions)
+		$this->load->model( 'setting/cron' );
+		$this->model_setting_cron->addCron( 'recurrent_gopay', 'GoPay recurrent payment (subscriptions)',
+			'day', 'extension/opencart_gopay/cron/gopay', 1 );
 	}
 
 	/**
