@@ -304,4 +304,39 @@ class GoPay_API {
 				break;
 		}
 	}
+
+	/**
+	 * GoPay create recurrence
+	 *
+	 * @param int|string $amount amount of the recurrence.
+	 * @param object $order order detail.
+	 * @param array $items list of items.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @return Response
+	 * @since 1.0.0
+	 */
+	public static function create_recurrence( $amount, $order, $items, $controller ): Response {
+
+		$options              = $controller->model_setting_setting->getSetting( 'payment_gopay' );
+		$gopay                = self::auth_gopay( $options );
+
+		$data = array(
+			'amount'            => $amount * 100,
+			'currency'          => $order['currency_code'],
+			'order_number'      => $order['order_id'],
+			'order_description' => 'subscription',
+			'items'             => $items,
+			'additional_params' => array(
+				array(
+					'name'  => 'invoicenumber',
+					'value' => $order['order_id'],
+				),
+			),
+		);
+
+		$response = $gopay->createRecurrence( $order['transaction_id'], $data );
+
+		return $response;
+	}
 }
