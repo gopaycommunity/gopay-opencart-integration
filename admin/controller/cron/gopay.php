@@ -13,7 +13,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 
 		$filter_data = [
 			'filter_subscription_status_id' => $this->config->get( 'config_subscription_active_status_id' ),
-			'filter_date_next'              => date( 'Y-m-d H:i:s', strtotime('-5 days' ) )
+			'filter_date_next'              => date( 'Y-m-d H:i:s' )
 		];
 
 		$subscriptions = $this->model_sale_subscription->getSubscriptions( $filter_data );
@@ -23,6 +23,10 @@ class GoPay extends \Opencart\System\Engine\Controller
 				$amount = $subscription['trial_price'];
 			} elseif ( !$subscription['duration'] || $subscription['remaining'] ) {
 				$amount = $subscription['price'];
+			}
+
+			if ( !$amount ) {
+				continue;
 			}
 
 			$order    = $this->db->query( 'SELECT * FROM `' . DB_PREFIX . 'order` WHERE order_id = ' .
