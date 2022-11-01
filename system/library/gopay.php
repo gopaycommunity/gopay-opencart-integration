@@ -15,6 +15,7 @@ require_once( DIR_EXTENSION . '/opencart_gopay/vendor/autoload.php' );
 
 use GoPay\Http\Response;
 use GoPay\Payments;
+use Opencart\System\Library\Log;
 
 /**
  * GoPay API connector
@@ -225,6 +226,124 @@ class GoPay_API {
 	}
 
 	/**
+	 * Get order history
+	 *
+	 * @param int|string $order_id order id.
+	 * @param int|string $order_status_id order status id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @return array;
+	 *
+	 * @since  1.0.0
+	 */
+	public static function get_order_history( $order_id, $order_status_id, $controller ) {
+		$history = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
+			"order_history` WHERE `order_id` = '" . (int)$order_id . "' AND `order_status_id` = '" . $order_status_id .
+			"' ORDER BY `order_history_id` DESC" )->row;
+
+		return $history;
+	}
+
+	/**
+	 * Get last subscription history for id
+	 *
+	 * @param int|string $subscription_id subscription id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @return array;
+	 *
+	 * @since  1.0.0
+	 */
+	public static function get_subscription_history( $subscription_id, $controller ) {
+		$history = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
+			"subscription_history` WHERE `subscription_id` = '" . (int)$subscription_id .
+			"' ORDER BY `subscription_history_id` DESC" )->row;
+
+		return $history;
+	}
+
+	/**
+	 * Change subscription history status
+	 *
+	 * @param int|string $subscription_id subscription id.
+	 * @param int|string $subscription_status_id subscription status id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function update_subscription_history_status( $subscription_status_id, $subscription_id, $controller ) {
+		$history = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
+			"subscription_history`  WHERE `subscription_id` = '" .
+			(int)$subscription_id . "' ORDER BY `subscription_history_id` DESC" )->row;
+
+		if ( $history ) {
+			$controller->db->query( "UPDATE `" . DB_PREFIX .
+				"subscription_history` SET `subscription_status_id` = '" . (int)$subscription_status_id .
+				"' WHERE `subscription_history_id` = '" . (int)$history['subscription_history_id']  . "'" );
+		}
+	}
+
+	/**
+	 * Update subscription status
+	 *
+	 * @param int|string $subscription_status_id subscription status id.
+	 * @param int|string $subscription_id subscription id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function update_subscription_status( $subscription_status_id, $subscription_id, $controller ) {
+		$controller->db->query( "UPDATE `" . DB_PREFIX .
+			"subscription` SET `subscription_status_id` = '" . $subscription_status_id .
+			"' WHERE `subscription_id` = '" . (int)$subscription_id . "'" );
+	}
+
+	/**
+	 * Update trial remaining
+	 *
+	 * @param int $trial_remaining Trial remaining.
+	 * @param int|string $subscription_id Subscription id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function update_trial_remaining( $trial_remaining, $subscription_id, $controller ) {
+		$controller->db->query( "UPDATE `" . DB_PREFIX .
+			"subscription` SET `trial_remaining` = '" . (int)$trial_remaining .
+			"' WHERE `subscription_id` = '" . (int)$subscription_id . "'" );
+	}
+
+	/**
+	 * Update remaining
+	 *
+	 * @param int $remaining Remaining.
+	 * @param int|string $subscription_id Subscription id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function update_remaining( $remaining, $subscription_id, $controller ) {
+		$controller->db->query( "UPDATE `" . DB_PREFIX .
+			"subscription` SET `remaining` = '" . (int)$remaining .
+			"' WHERE `subscription_id` = '" . (int)$subscription_id . "'" );
+	}
+
+	/**
+	 * Update date next
+	 *
+	 * @param string $date_next Date next.
+	 * @param int|string $subscription_id Subscription id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function update_date_next( $date_next, $subscription_id, $controller ) {
+		$controller->db->query( "UPDATE `" . DB_PREFIX .
+			"subscription` SET `date_next` = '" .  $controller->db->escape($date_next) .
+			"' WHERE `subscription_id` = '" . (int)$subscription_id . "'" );
+	}
+
+	/**
 	 * Check payment status
 	 *
 	 * @param string $gopay_transaction_id GoPay transaction id.
@@ -256,13 +375,14 @@ class GoPay_API {
 			return;
 		}
 
+		$subscription = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
+			"subscription` WHERE `order_id` = '" . (int)$order_id . "'" )->row;
+
 		switch ( $response->json['state'] ) {
 			case 'PAID':
 			case 'AUTHORIZED':
 				$products     = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
 					"order_product` WHERE `order_id` = '" . (int)$order_id . "'" );
-				$subscription = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
-					"subscription` WHERE `order_id` = '" . (int)$order_id . "'" )->row;
 
 				// Check if all products are downloadable.
 				$all_virtual_downloadable = true;
@@ -275,16 +395,37 @@ class GoPay_API {
 					}
 				}
 
-				if ( $subscription ) {
-					$controller->db->query( "UPDATE `" . DB_PREFIX .
-						"subscription` SET `subscription_status_id` = '" . 2 .
-						"' WHERE `subscription_id` = '" . (int)$subscription['subscription_id'] . "'" );
+				if ( $subscription && self::get_subscription_history( $subscription['subscription_id'], $controller
+					)['subscription_status_id'] != $controller->config->get( 'config_subscription_active_status_id' )
+				) {
+					self::update_subscription_status( $controller->config->get( 'config_subscription_active_status_id' ),
+						$subscription['subscription_id'], $controller );
+					self::update_subscription_history_status( $controller->config->get( 'config_subscription_active_status_id' ),
+						$subscription['subscription_id'], $controller );
+
+					if ( $subscription['trial_remaining'] ) {
+						self::update_trial_remaining( $subscription['trial_remaining'] - 1,
+							$subscription['subscription_id'], $controller );
+						self::update_date_next( date('Y-m-d', strtotime('+' .
+							$subscription['trial_cycle'] . ' ' . $subscription['trial_frequency'] ) ),
+							$subscription['subscription_id'], $controller );
+					} elseif ( $subscription['remaining'] ) {
+						self::update_remaining( $subscription['remaining'] - 1,
+							$subscription['subscription_id'], $controller );
+						self::update_date_next( date('Y-m-d', strtotime('+' .
+							$subscription['cycle'] . ' ' . $subscription['frequency'] ) ),
+							$subscription['subscription_id'], $controller );
+					}
 				}
 
 				if ( $all_virtual_downloadable ) {
-					$controller->model_checkout_order->addHistory( $order_id, 5, '', true );
+					if ( !self::get_order_history( $order_id, 5, $controller ) ) {
+						$controller->model_checkout_order->addHistory( $order_id, 5, '', true );
+					}
 				} else {
-					$controller->model_checkout_order->addHistory( $order_id, 2, '', true );
+					if ( !self::get_order_history( $order_id, 2, $controller ) ) {
+						$controller->model_checkout_order->addHistory( $order_id, 2, '', true );
+					}
 				}
 				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
 
@@ -293,12 +434,30 @@ class GoPay_API {
 			case 'CREATED':
 			case 'TIMEOUTED':
 			case 'CANCELED':
-				$controller->model_checkout_order->addHistory( $order_id, 10, '', true );
+				if ( $subscription ) {
+					self::update_subscription_status( $controller->config->get( 'config_subscription_failed_status_id' ),
+						$subscription['subscription_id'], $controller );
+					self::update_subscription_history_status( $controller->config->get( 'config_subscription_failed_status_id' ),
+						$subscription['subscription_id'], $controller );
+				}
+
+				if ( !self::get_order_history( $order_id, 10, $controller ) ) {
+					$controller->model_checkout_order->addHistory( $order_id, 10, '', true );
+				}
 				$controller->response->redirect( $controller->url->link( 'checkout/failure', '', 'SSL' ) );
 
 				break;
 			case 'REFUNDED':
-				$controller->model_checkout_order->addHistory( $order_id, 11, '', true );
+				if ( $subscription ) {
+					self::update_subscription_status( $controller->config->get( 'config_subscription_canceled_status_id' ),
+						$subscription['subscription_id'], $controller );
+					self::update_subscription_history_status( $controller->config->get( 'config_subscription_canceled_status_id' ),
+						$subscription['subscription_id'], $controller );
+				}
+
+				if ( !self::get_order_history( $order_id, 11, $controller ) ) {
+					$controller->model_checkout_order->addHistory( $order_id, 11, '', true );
+				}
 				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
 
 				break;
