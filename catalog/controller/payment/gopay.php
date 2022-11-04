@@ -1,6 +1,8 @@
 <?php
 namespace Opencart\Catalog\Controller\Extension\OpencartGopay\Payment;
 
+use Opencart\System\Library\Log;
+
 class GoPay extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$this->webhook();
@@ -18,6 +20,10 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$data['embed'] = 'https://gw.sandbox.gopay.com/gp-gw/js/embed.js';
 		} else {
 			$data['embed'] = 'https://gate.gopay.cz/gp-gw/js/embed.js';
+		}
+
+		if ( isset( $this->session->data['order_id'] ) ) {
+			$data['order_id'] = $this->session->data['order_id'];
 		}
 
 		$data['countries'] = $this->db->query( "SELECT country_id FROM `" . DB_PREFIX .
@@ -185,25 +191,25 @@ class GoPay extends \Opencart\System\Engine\Controller {
 	/**
 	 * Calculate subscription end date
 	 *
-	 * @param array $products list of products
+	 * @param array $subscription subscription
 	 * @return string|int
 	 *
 	 * @since  1.0.0
 	 */
-	private function calculate_subscription_end_date( array $products ) {
+	private function calculate_subscription_end_date( array $subscription ) {
 		$end_date = '';
-		if ( $products[0]['subscription'] ) {
-			if ( $products[0]['subscription']['trial_duration'] == 0 ||
-				$products[0]['subscription']['duration'] == 0) {
+		if ( $subscription ) {
+			if ( $subscription['trial_duration'] == 0 ||
+				$subscription['duration'] == 0) {
 				$end_date = 0;
 			} else {
-				$trial_duration  = $products[0]['subscription']['trial_duration'] * $products[0]['subscription']['trial_cycle'];
+				$trial_duration  = $subscription['trial_duration'] * $subscription['trial_cycle'];
 				$trial_strtotime = strtotime( '+' . $trial_duration . ' '
-					. $products[0]['subscription']['trial_frequency'] . ( $trial_duration > 1 ? 's' : '') );
+					. $subscription['trial_frequency'] . ( $trial_duration > 1 ? 's' : '') );
 
-				$duration  = $products[0]['subscription']['duration'] * $products[0]['subscription']['cycle'];
+				$duration  = $subscription['duration'] * $subscription['cycle'];
 				$strtotime = strtotime( '+' . $duration . ' '
-					. $products[0]['subscription']['frequency'] . ( $duration > 1 ? 's' : ''), $trial_strtotime );
+					. $subscription['frequency'] . ( $duration > 1 ? 's' : ''), $trial_strtotime );
 
 				$end_date = date( 'Y-m-d', $strtotime );
 			}
@@ -221,11 +227,11 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
 		$data = [];
 
-		if ( !isset( $this->session->data['order_id'] ) ) {
+		if ( !isset( $this->request->get['order_id'] ) ) {
 			$data['error']['warning'] = $this->language->get( 'error_order' );
 		}
 
-		$order_id             = $this->session->data['order_id'];
+		$order_id             = $this->request->get['order_id'];
 		$order                = $this->model_checkout_order->getOrder( $order_id );
 		$currency_value       = $this->currency->getValue( $this->session->data['currency'] );
 		$gopay_payment_method = $this->request->post['gopay_payment_method'];
@@ -243,7 +249,10 @@ class GoPay extends \Opencart\System\Engine\Controller {
 					'order_id'  => $order_id ) ) ),
 		);
 
-		$end_date = $this->calculate_subscription_end_date( $this->cart->getProducts() );
+		$subscription = $this->db->query( 'SELECT * FROM `' . DB_PREFIX . 'subscription` WHERE order_id = ' .
+			(int)$order_id )->row;
+
+		$end_date = $this->calculate_subscription_end_date( $subscription );
 
 		$response = \GoPay_API::create_payment(
 			$gopay_payment_method,
