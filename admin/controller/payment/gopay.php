@@ -113,16 +113,28 @@ class GoPay extends \Opencart\System\Engine\Controller
 	public function install(): void
 	{
 		// Create event for the menu
+		$this->load->model( 'setting/event' );
 		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
 		$this->model_extension_opencart_gopay_payment_gopay->create_log_table();
 
-		$this->load->model( 'setting/event' );
 		$this->model_setting_event->addEvent(
 			array(
 				'code'        => 'add_gopay_to_column_left',
 				'description' => 'Create GoPay Menu',
 				'trigger'     => 'admin/view/common/column_left/before',
 				'action'      => 'extension/opencart_gopay/menu/gopay|menus',
+				'status'      => 1,
+				'sort_order'  => 1,
+			)
+		);
+
+		// Create event for the catalog order history info
+		$this->model_setting_event->addEvent(
+			array(
+				'code'        => 'change_order_history_info_page',
+				'description' => 'Change order history info page',
+				'trigger'     => 'catalog/view/account/order|info/after',
+				'action'      => 'extension/opencart_gopay/account/gopay|info',
 				'status'      => 1,
 				'sort_order'  => 1,
 			)
