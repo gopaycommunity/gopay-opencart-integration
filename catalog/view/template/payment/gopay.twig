@@ -71,7 +71,7 @@
         var element = this;
 
         $.ajax({
-            url: 'index.php?route=extension/opencart_gopay/payment/gopay|create_payment&language={{ language }}',
+            url: 'index.php?route=extension/opencart_gopay/payment/gopay|create_payment&language={{ language }}&order_id={{ order_id }}',
             type: 'post',
             data: $('#form-gopay').serialize() + '&' + $('#shipping-address').serialize(),
             dataType: 'json',
