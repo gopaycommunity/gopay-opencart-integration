@@ -112,11 +112,12 @@ class GoPay extends \Opencart\System\Engine\Controller
 	 */
 	public function install(): void
 	{
-		// Create event for the menu
 		$this->load->model( 'setting/event' );
+		$this->load->model( 'user/user_group' );
 		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
 		$this->model_extension_opencart_gopay_payment_gopay->create_log_table();
 
+		// Create event for the menu
 		$this->model_setting_event->addEvent(
 			array(
 				'code'        => 'add_gopay_to_column_left',
@@ -133,8 +134,20 @@ class GoPay extends \Opencart\System\Engine\Controller
 			array(
 				'code'        => 'change_order_history_info_page',
 				'description' => 'Change order history info page',
-				'trigger'     => 'catalog/view/account/order|info/after',
+				'trigger'     => 'catalog/controller/account/order|info/after',
 				'action'      => 'extension/opencart_gopay/account/gopay|info',
+				'status'      => 1,
+				'sort_order'  => 1,
+			)
+		);
+
+		// Create event for sale order info
+		$this->model_setting_event->addEvent(
+			array(
+				'code'        => 'change_sale_order_info_page',
+				'description' => 'Change sale order info page',
+				'trigger'     => 'admin/controller/sale/order|info/after',
+				'action'      => 'extension/opencart_gopay/sale/gopay|info',
 				'status'      => 1,
 				'sort_order'  => 1,
 			)
@@ -144,6 +157,30 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->load->model( 'setting/cron' );
 		$this->model_setting_cron->addCron( 'recurrent_gopay', 'GoPay recurrent payment (subscriptions)',
 			'day', 'extension/opencart_gopay/cron/gopay', 1 );
+
+		// Add permissions
+		$this->load->model( 'user/user' );
+		$this->load->model( 'user/user_group' );
+		if ( array_key_exists( 'user_id', $this->session->data ) ) {
+			$user_id = (int)$this->session->data['user_id'];
+		} else {
+			$user_id = 0;
+		}
+
+		if ( $user_id ) {
+			$user = $this->model_user_user->getUser( $user_id );
+		}
+
+		if ( $user ) {
+			$this->model_user_user_group->addPermission( $user['user_group_id'], 'access', 'extension/opencart_gopay/menu/gopay' );
+			$this->model_user_user_group->addPermission( $user['user_group_id'], 'modify', 'extension/opencart_gopay/menu/gopay' );
+
+			$this->model_user_user_group->addPermission( $user['user_group_id'], 'access', 'extension/opencart_gopay/payment/gopay' );
+			$this->model_user_user_group->addPermission( $user['user_group_id'], 'modify', 'extension/opencart_gopay/payment/gopay' );
+
+			$this->model_user_user_group->addPermission( $user['user_group_id'], 'access', 'extension/opencart_gopay/sale/gopay' );
+			$this->model_user_user_group->addPermission( $user['user_group_id'], 'modify', 'extension/opencart_gopay/sale/gopay' );
+		}
 	}
 
 	/**
