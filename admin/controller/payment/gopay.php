@@ -114,8 +114,14 @@ class GoPay extends \Opencart\System\Engine\Controller
 	{
 		$this->load->model( 'setting/event' );
 		$this->load->model( 'user/user_group' );
+
+		// Create log table
 		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
 		$this->model_extension_opencart_gopay_payment_gopay->create_log_table();
+
+		// Create refund table
+		$this->load->model( 'extension/opencart_gopay/sale/gopay' );
+		$this->model_extension_opencart_gopay_sale_gopay->create_refund_table();
 
 		// Create event for the menu
 		$this->model_setting_event->addEvent(
