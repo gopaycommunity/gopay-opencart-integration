@@ -113,7 +113,6 @@ class GoPay extends \Opencart\System\Engine\Controller
 	public function install(): void
 	{
 		$this->load->model( 'setting/event' );
-		$this->load->model( 'user/user_group' );
 
 		// Create log table
 		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
@@ -196,8 +195,43 @@ class GoPay extends \Opencart\System\Engine\Controller
 	 */
 	public function uninstall() {
 
+		// Drop log table
+		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
+		$this->model_extension_opencart_gopay_payment_gopay->drop_log_table();
+
+		// Drop refund table
+		$this->load->model( 'extension/opencart_gopay/sale/gopay' );
+		$this->model_extension_opencart_gopay_sale_gopay->drop_refund_table();
+
+		// Remove events when uninstalling module
 		$this->load->model( 'setting/event' );
 		$this->model_setting_event->deleteEventByCode( 'add_gopay_to_column_left' );
+		$this->model_setting_event->deleteEventByCode( 'change_order_history_info_page' );
+		$this->model_setting_event->deleteEventByCode( 'change_sale_order_info_page' );
+
+		// Remove permissions
+		$this->load->model( 'user/user' );
+		$this->load->model( 'user/user_group' );
+		if ( array_key_exists( 'user_id', $this->session->data ) ) {
+			$user_id = (int)$this->session->data['user_id'];
+		} else {
+			$user_id = 0;
+		}
+
+		if ( $user_id ) {
+			$user = $this->model_user_user->getUser( $user_id );
+		}
+
+		if ( $user ) {
+			$this->model_user_user_group->removePermission( $user['user_group_id'], 'access', 'extension/opencart_gopay/menu/gopay' );
+			$this->model_user_user_group->removePermission( $user['user_group_id'], 'modify', 'extension/opencart_gopay/menu/gopay' );
+
+			$this->model_user_user_group->removePermission( $user['user_group_id'], 'access', 'extension/opencart_gopay/payment/gopay' );
+			$this->model_user_user_group->removePermission( $user['user_group_id'], 'modify', 'extension/opencart_gopay/payment/gopay' );
+
+			$this->model_user_user_group->removePermission( $user['user_group_id'], 'access', 'extension/opencart_gopay/sale/gopay' );
+			$this->model_user_user_group->removePermission( $user['user_group_id'], 'modify', 'extension/opencart_gopay/sale/gopay' );
+		}
 	}
 
 	/**
