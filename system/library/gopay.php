@@ -498,4 +498,39 @@ class GoPay_API {
 
 		return $response;
 	}
+
+	/**
+	 * Get status of the transaction
+	 *
+	 * @param int $transaction_id Transaction id.
+	 * @param int $order_id Order id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function get_status( int $transaction_id, int $order_id, $controller ): Response {
+		$options  = $controller->model_setting_setting->getSetting( 'payment_gopay' );
+		$gopay    = self::auth_gopay( $options );
+		$response = $gopay->getStatus( $transaction_id );
+
+		return $response;
+	}
+
+	/**
+	 * Refund payment
+	 *
+	 * @param int    $transaction_id Transaction id.
+	 * @param string $amount amount to be refunded.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @return Response $response
+	 * @since  1.0.0
+	 */
+	public static function refund_payment( int $transaction_id, string $amount, $controller ): Response {
+		$options  = $controller->model_setting_setting->getSetting( 'payment_gopay' );
+		$gopay    = self::auth_gopay( $options );
+		$response = $gopay->refundPayment( $transaction_id, $amount );
+
+		return $response;
+	}
 }
