@@ -23,6 +23,15 @@ class GoPay extends \Opencart\System\Engine\Model {
 	}
 
 	/**
+	 * drop log table
+	 *
+	 * @since  1.0.0
+	 */
+	public function drop_log_table() {
+		$this->db->query( "DROP TABLE IF EXISTS `" . DB_PREFIX . "gopay_log`;");
+	}
+
+	/**
 	 * Get log data
 	 *
 	 * @since  1.0.0
