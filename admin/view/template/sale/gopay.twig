@@ -1,22 +1,43 @@
 {{ order_info }}
-<p>index.php?route=extension/opencart_gopay/sale/gopay|process_refund&language={{ language }}&user_token={{ user_token }}&order_id={{ order_id }}</p>
 <script>
-    $('#order-products').after('\
-    <tbody>\
-        <form id="form-gopay">\
-            <tr>\
-                <td colspan="5"></td>\
-                <td class="text-end"><button id="refund-button" type="submit" class="btn btn-primary"> {{ refund }} </button></td>\
-            </tr>\
-        </form>\
-    </tbody>');
+    elementExists = document.getElementById("tbody-gopay");
+
+    if ( !elementExists ) {
+        $('#order-products').after('\
+            <tbody id="tbody-gopay">\
+                <tr>\
+                    <td colspan="5">\
+                        <div style="display: flex; float: right; justify-content: end;">\
+                            <div id="input-refund-gopay">\
+                                <label for="refunded-gopay" style="padding:10px;">{{ total_to_be_refunded_message }}</label>\
+                                <input id="shipping-refund-gopay" type="number" placeholder="{{ can_be_refunded }}" onkeyup="if( parseFloat( this.value ) > {{ can_be_refunded }} ){ this.value = {{ can_be_refunded }}; return false; }" min="0" max="{{ can_be_refunded }}" step="0.01" style="padding-left:10px;">\
+                            </div>\
+                            <div id="message-refund-gopay" style="display: none;">\
+                                <a id="message-refund-gopay" >{{ refund_gopay_message }}</a>\
+                            </div>\
+                        </div>\
+                    </td>\
+                    <td class="text-end">\
+                        <form id="form-gopay">\
+                            <button id="refund-button" type="submit" class="btn btn-primary"> {{ refund }} </button>\
+                            <a id="message-error-gopay" style="display: none; color: red; text-align: center; white-space: nowrap">{{ error_refund_gopay_message }}</a>\
+                        </form>\
+                    </td>\
+                </tr>\
+            </tbody>');
+    }
 
     $('#form-gopay').on('submit', function (e) {
         e.preventDefault();
+        e.stopPropagation();
+
+        let input_value = document.getElementById( 'shipping-refund-gopay' ).value;
 
         $.ajax({
             url: 'index.php?route=extension/opencart_gopay/sale/gopay|process_refund&language={{ language }}&user_token={{ user_token }}&order_id={{ order_id }}',
-            type: 'post',
+            type: 'POST',
+            data: 'input_value=' + input_value,
+            dataType: 'json',
             contentType: 'application/x-www-form-urlencoded',
             cache: false,
             processData: false,
@@ -24,9 +45,20 @@
             beforeSend: function () {
                 $('#refund-button').prop('disabled', true).addClass('loading');
             },
-            success: function (json) {
-                $('#refund-button .alert').remove();
-                $('#refund-button .lds-spinner').addClass('d-none');
+            success: function ( json ) {
+                $('#form-gopay .alert').remove();
+                $('#form-gopay .lds-spinner').addClass('d-none');
+
+                if ( json['refunded'] ) {
+                    $('#input-refund-gopay').hide();
+                    $('#message-error-gopay').hide();
+
+                    $('#message-refund-gopay').show();
+                    $('#message-refund-gopay').text( json['refund_gopay_message'] );
+                } else {
+                    $('#refund-button').prop('disabled', false).addClass('loading');
+                    $('#message-error-gopay').show();
+                }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
