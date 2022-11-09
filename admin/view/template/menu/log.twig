@@ -198,7 +198,7 @@
                 {% for key, log in log_page['log_data'] %}
                     <tr>
                         <td>{{ log['id'] }}</td>
-                        <td><a href="{{ order_url }}{{ log['log']['json']['order_number'] }}">{{ log['log']['json']['order_number'] }}</a></td>
+                        <td><a href="{{ order_url }}{{ log['order_id'] }}">{{ log['order_id'] }}</a></td>
                         <td><a href="{{ log['log']['json']['gw_url']|default('') }}">{{ log['transaction_id'] }}</a></td>
                         <td>{{ log['message'] }}</td>
                         <td>{{ log['created_at'] }} (GMT)</td>
