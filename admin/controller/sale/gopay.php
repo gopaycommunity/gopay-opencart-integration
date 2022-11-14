@@ -1,5 +1,6 @@
 <?php
 namespace Opencart\Admin\Controller\Extension\OpencartGopay\Sale;
+use DateTime;
 use Opencart\System\Library\Log;
 
 class GoPay extends \Opencart\System\Engine\Controller
@@ -39,6 +40,15 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$data['refund']   = $this->language->get( 'refund' );
 			$data['order_id'] = $order_id;
 
+			$data['partial_refund_restrictions'] = false;
+			$data['total_to_refund']             = round ( $order['total'] * $order['currency_value'], 2 );
+
+			// Check if refund can be made
+			if ( ! ( DateTime::createFromFormat( 'Y-m-d H:i:s', $order['date_modified'] )->getTimestamp() < time() - 86400 ) ) {
+				$data['partial_refund_restrictions'] = true;
+				$data['refund_gopay_message']        = $this->language->get( 'partial_refund_restriction_message' );
+			}
+
 			$this->response->setOutput( $this->load->view( 'extension/opencart_gopay/sale/gopay', $data ) );
 		} else {
 			$this->response->setOutput( $data['order_info'] );
@@ -51,7 +61,13 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->load->language( 'extension/opencart_gopay/sale/gopay' );
 		$this->load->model( 'extension/opencart_gopay/sale/gopay' );
 
-		$input_value = $_POST['input_value'];
+		$data['refunded'] = false;
+		$input_value      = $_POST['input_value'];
+
+		if ( !$input_value ) {
+			$this->response->setOutput( json_encode( $data) );
+			return;
+		}
 
 		if ( array_key_exists( 'order_id', $this->request->get ) ) {
 			$order_id = (int)$this->request->get['order_id'];
@@ -63,8 +79,6 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$order = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order` WHERE `order_id` = '" .
 				(int)$order_id . "'")->row;
 		}
-
-		$data['refunded'] = false;
 
 		if ( $order ) {
 			$transaction_id = $order['transaction_id'];
