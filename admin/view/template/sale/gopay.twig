@@ -9,7 +9,7 @@
                     <td colspan="5">\
                         <div style="display: flex; float: right; justify-content: end;">\
                             <div id="input-refund-gopay">\
-                                <label for="refunded-gopay" style="padding:10px;">{{ total_to_be_refunded_message }}</label>\
+                                <label id="shipping-refund-gopay-label" for="refunded-gopay" style="padding:10px;">{{ total_to_be_refunded_message }}</label>\
                                 <input id="shipping-refund-gopay" type="number" placeholder="{{ can_be_refunded }}" onkeyup="if( parseFloat( this.value ) > {{ can_be_refunded }} ){ this.value = {{ can_be_refunded }}; return false; }" min="0" max="{{ can_be_refunded }}" step="0.01" style="padding-left:10px;">\
                             </div>\
                             <div id="message-refund-gopay" style="display: none;">\
@@ -26,6 +26,13 @@
                 </tr>\
             </tbody>');
     }
+
+    {% if partial_refund_restrictions %}
+        $("#shipping-refund-gopay").on('change', function() {
+            $(this).val( {{ total_to_refund|json_encode()|raw }} );
+            $('#shipping-refund-gopay-label').text( {{ refund_gopay_message|json_encode()|raw }} );
+        });
+    {% endif %}
 
     $('#form-gopay').on('submit', function (e) {
         e.preventDefault();
