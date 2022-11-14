@@ -153,6 +153,8 @@ class GoPay extends \Opencart\System\Engine\Controller
 	 * @since  1.0.0
 	 */
 	public function payment_gopay( $subscription ) {
+		$retry_payment_method = $this->model_setting_setting->getValue( 'payment_gopay_payment_retry' );
+
 		return "<style>
     .payment_method_oc_gopay_gateway_selection {
         border-bottom: 1px dashed;
@@ -170,7 +172,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 <fieldset>
     <p style=\"font-size: 15px;\"><b>" . $this->model_setting_setting->getValue( 'payment_gopay_description' ) .  "</b></p>
     <form id=\"form-gopay\">" .
-			$this->payment_fields( $subscription )	.
+			( !$retry_payment_method ? $this->payment_fields( $subscription ) : '' )	.
         "<div class=\"d-inline-block pt-2 pd-2 w-100 text-end\">
             <button type=\"submit\" id=\"button-confirm\" class=\"btn btn-primary\">Retry payment</button>
         </div>

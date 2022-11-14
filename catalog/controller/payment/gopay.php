@@ -223,6 +223,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/log.php' );
 		
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
+		$this->load->model( 'setting/setting' );
 		$this->load->model( 'checkout/order' );
 
 		$data = [];
@@ -234,9 +235,17 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		$order_id             = $this->request->get['order_id'];
 		$order                = $this->model_checkout_order->getOrder( $order_id );
 		$currency_value       = $this->currency->getValue( $this->session->data['currency'] );
-		$gopay_payment_method = $this->request->post['gopay_payment_method'];
 		$options              = $this->model_setting_setting->getSetting( 'payment_gopay' );
 		$items                = $this->get_items( $currency_value );
+
+		if ( array_key_exists( 'gopay_payment_method', $this->request->post ) ) {
+			$gopay_payment_method = $this->request->post['gopay_payment_method'];
+		} else {
+			$this->load->model( 'account/order' );
+			$histories            = $this->model_account_order->getHistories( $order_id );
+			$history              = end( $histories );
+			$gopay_payment_method = str_replace( 'GoPay payment method = ', '', $history['comment'] );
+		}
 
 		$callback = array(
 			'return_url'       => html_entity_decode( $this->url->link( 'extension/opencart_gopay/payment/gopay',
