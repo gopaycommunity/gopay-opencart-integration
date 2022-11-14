@@ -242,11 +242,13 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			'return_url'       => html_entity_decode( $this->url->link( 'extension/opencart_gopay/payment/gopay',
 				array( 'language' => $this->config->get( 'config_language' ),
 					'gopay-api' => 'oc_gopay_gateway_return',
-					'order_id'  => $order_id ) ) ),
+					'order_id'  => $order_id,
+					'payment_method' => $gopay_payment_method ) ) ),
 			'notification_url' => html_entity_decode( $this->url->link( 'extension/opencart_gopay/payment/gopay',
 				array( 'language' => $this->config->get( 'config_language' ),
 					'gopay-api' => 'oc_gopay_gateway_notification',
-					'order_id'  => $order_id ) ) ),
+					'order_id'  => $order_id,
+					'payment_method' => $gopay_payment_method ) ) ),
 		);
 
 		$subscription = $this->db->query( 'SELECT * FROM `' . DB_PREFIX . 'subscription` WHERE order_id = ' .
@@ -296,12 +298,13 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 
-		$gopay_api      = filter_input( INPUT_GET, 'gopay-api' );
-		$transaction_id = filter_input( INPUT_GET, 'id' );
-		$order_id       = filter_input( INPUT_GET, 'order_id' );
+		$gopay_api            = filter_input( INPUT_GET, 'gopay-api' );
+		$transaction_id       = filter_input( INPUT_GET, 'id' );
+		$order_id             = filter_input( INPUT_GET, 'order_id' );
+		$gopay_payment_method = filter_input( INPUT_GET, 'payment_method' );
 
 		if ( $gopay_api && $transaction_id ) {
-			\GoPay_API::check_payment_status( $transaction_id, $order_id, $this );
+			\GoPay_API::check_payment_status( $transaction_id, $order_id, $gopay_payment_method, $this );
 		}
 	}
 }

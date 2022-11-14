@@ -348,11 +348,12 @@ class GoPay_API {
 	 *
 	 * @param string $gopay_transaction_id GoPay transaction id.
 	 * @param string $order_id             Order id.
+	 * @param string $gopay_payment_method Payment method.
 	 * @param object $controller           GoPay payment controller.
 	 *
 	 * @since  1.0.0
 	 */
-	public static function check_payment_status( $gopay_transaction_id, $order_id, $controller ) {
+	public static function check_payment_status( $gopay_transaction_id, $order_id, $gopay_payment_method, $controller ) {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/log.php' );
 		$controller->load->model( 'checkout/order' );
 
@@ -420,11 +421,13 @@ class GoPay_API {
 
 				if ( $all_virtual_downloadable ) {
 					if ( !self::get_order_history( $order_id, 5, $controller ) ) {
-						$controller->model_checkout_order->addHistory( $order_id, 5, '', true );
+						$controller->model_checkout_order->addHistory( $order_id, 5, 'GoPay payment method = ' .
+							$gopay_payment_method, true );
 					}
 				} else {
 					if ( !self::get_order_history( $order_id, 2, $controller ) ) {
-						$controller->model_checkout_order->addHistory( $order_id, 2, '', true );
+						$controller->model_checkout_order->addHistory( $order_id, 2, 'GoPay payment method = ' .
+							$gopay_payment_method, true );
 					}
 				}
 				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
@@ -442,7 +445,8 @@ class GoPay_API {
 				}
 
 				if ( !self::get_order_history( $order_id, 10, $controller ) ) {
-					$controller->model_checkout_order->addHistory( $order_id, 10, '', true );
+					$controller->model_checkout_order->addHistory( $order_id, 10, 'GoPay payment method = ' .
+						$gopay_payment_method, true );
 				}
 				$controller->response->redirect( $controller->url->link( 'checkout/failure', '', 'SSL' ) );
 
@@ -456,7 +460,8 @@ class GoPay_API {
 				}
 
 				if ( !self::get_order_history( $order_id, 11, $controller ) ) {
-					$controller->model_checkout_order->addHistory( $order_id, 11, '', true );
+					$controller->model_checkout_order->addHistory( $order_id, 11, 'GoPay payment method = ' .
+						$gopay_payment_method, true );
 				}
 				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
 
