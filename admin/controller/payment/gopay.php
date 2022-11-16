@@ -102,6 +102,9 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$data['column_left'] = $this->load->controller( 'common/column_left' );
 		$data['footer']      = $this->load->controller( 'common/footer' );
 
+		$data['user_token'] = $this->session->data['user_token'];
+		$data['language']   = $this->config->get( 'config_language' );
+
 		$this->response->setOutput( $this->load->view( 'extension/opencart_gopay/payment/gopay', $data ) );
 	}
 
@@ -242,19 +245,22 @@ class GoPay extends \Opencart\System\Engine\Controller
 	 */
 	public function save(): void
 	{
+		$this->load->model( 'setting/setting' );
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 
-		$data = $this->model_setting_setting->getSetting( 'payment_gopay' );
-		foreach ( $this->request->post as $key => $value ) {
-			$data[ $key ] = $value;
+		$data = [];
+		if ( !$this->user->hasPermission( 'modify', 'extension/opencart_gopay/payment/gopay' ) ) {
+			$data['error'] = $this->language->get( 'error_permission' );
 		}
 
-		if ( $this->user->hasPermission( 'modify', 'extension/opencart_gopay/payment/gopay' ) ) {
-			$this->load->model( 'setting/setting' );
-			$this->model_setting_setting->editSetting( 'payment_gopay', $data );
+		if ( !$data ) {
+			$data = $this->model_setting_setting->getSetting( 'payment_gopay' );
+			foreach ( $this->request->post as $key => $value ) {
+				$data[ $key ] = $value;
+			}
+
+			$this->model_setting_setting->editSetting( 'payment_gopay', $this->request->post );
 			$data['success'] = $this->language->get( 'text_success' );
-		} else {
-			$data['error'] = $this->language->get( 'error_permission' );
 		}
 
 		$this->response->addHeader( 'Content-Type: application/json' );
