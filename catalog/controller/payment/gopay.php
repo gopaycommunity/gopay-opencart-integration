@@ -232,11 +232,20 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$data['error']['warning'] = $this->language->get( 'error_order' );
 		}
 
-		$order_id             = $this->request->get['order_id'];
-		$order                = $this->model_checkout_order->getOrder( $order_id );
-		$currency_value       = $this->currency->getValue( $this->session->data['currency'] );
-		$options              = $this->model_setting_setting->getSetting( 'payment_gopay' );
-		$items                = $this->get_items( $currency_value );
+		$order_id       = $this->request->get['order_id'];
+		$order          = $this->model_checkout_order->getOrder( $order_id );
+		$currency       = $this->session->data['currency'];
+		$currency_id    = $this->currency->getId( $currency );
+		$currency_value = $this->currency->getValue( $currency );
+		$options        = $this->model_setting_setting->getSetting( 'payment_gopay' );
+		$items          = $this->get_items( $currency_value );
+
+		// Change currency data
+		$this->db->query( "UPDATE `" . DB_PREFIX . "order` SET `currency_id` = '" . (int)$currency_id .
+			"', `currency_code` = '" . $this->db->escape( $currency ) .
+			"', `currency_value` = '" . (float)$currency_value .
+			"', `date_modified` = NOW() WHERE `order_id` = '" . (int)$order_id . "'" );
+		// End
 
 		if ( array_key_exists( 'gopay_payment_method', $this->request->post ) ) {
 			$gopay_payment_method = $this->request->post['gopay_payment_method'];
