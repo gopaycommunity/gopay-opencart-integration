@@ -263,7 +263,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 				$data[ $key ] = $value;
 			}
 
-			$this->model_setting_setting->editSetting( 'payment_gopay', $this->request->post );
+			$this->model_setting_setting->editSetting( 'payment_gopay', $data );
 			$data['success'] = $this->language->get( 'text_success' );
 		}
 
