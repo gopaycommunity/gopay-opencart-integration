@@ -212,6 +212,10 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->model_setting_event->deleteEventByCode( 'change_order_history_info_page' );
 		$this->model_setting_event->deleteEventByCode( 'change_sale_order_info_page' );
 
+		// Remove cron for recurrent payment (subscriptions)
+		$this->load->model( 'setting/cron' );
+		$this->model_setting_cron->deleteCronByCode( 'recurrent_gopay' );
+
 		// Remove permissions
 		$this->load->model( 'user/user' );
 		$this->load->model( 'user/user_group' );
