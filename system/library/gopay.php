@@ -344,6 +344,25 @@ class GoPay_API {
 	}
 
 	/**
+	 * Add subscription history
+	 *
+	 * @param int $subscription_id Subscription id.
+	 * @param int $subscription_status_id Subscription status id.
+	 * @param string $comment Comment.
+	 * @param bool $notify Notify.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @since  1.0.0
+	 */
+	public static function add_subscription_history( int $subscription_id, int $subscription_status_id,
+	                           string $comment, bool $notify, $controller )
+	{
+		$controller->db->query( "INSERT INTO `" . DB_PREFIX . "subscription_history` SET `subscription_id` = '" .
+			(int) $subscription_id . "', `subscription_status_id` = '" . (int) $subscription_status_id .
+			"', `comment` = '" . $controller->db->escape( $comment ) . "', `notify` = '" . (int) $notify . "', `date_added` = NOW()" );
+	}
+
+	/**
 	 * Check payment status
 	 *
 	 * @param string $gopay_transaction_id GoPay transaction id.
@@ -396,12 +415,19 @@ class GoPay_API {
 					}
 				}
 
-				if ( $subscription && self::get_subscription_history( $subscription['subscription_id'], $controller
-					)['subscription_status_id'] != $controller->config->get( 'config_subscription_active_status_id' )
-				) {
+				if ( $subscription ) {
+					$subscription_history = self::get_subscription_history( $subscription['subscription_id'], $controller );
+
+					if ( !$subscription_history ) {
+						self::add_subscription_history( $subscription['subscription_id'],
+							$controller->config->get( 'config_subscription_active_status_id' ),
+							'Success: GoPay recurrent payment created', false, $controller );
+					} else {
+						self::update_subscription_history_status( $controller->config->get( 'config_subscription_active_status_id' ),
+							$subscription['subscription_id'], $controller );
+					}
+
 					self::update_subscription_status( $controller->config->get( 'config_subscription_active_status_id' ),
-						$subscription['subscription_id'], $controller );
-					self::update_subscription_history_status( $controller->config->get( 'config_subscription_active_status_id' ),
 						$subscription['subscription_id'], $controller );
 
 					if ( $subscription['trial_remaining'] ) {
