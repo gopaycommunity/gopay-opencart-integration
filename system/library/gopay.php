@@ -93,7 +93,7 @@ class GoPay_API {
 	 * @param array    $options              plugin options.
 	 * @param array    $items                list of products.
 	 * @param array    $callback             callback links.
-	 * @param float    $currency_value       currency value.
+	 * @param float    $total                currency value.
 	 * @param array    $data                 Customer address.
 	 *
 	 * @return Response
@@ -101,7 +101,7 @@ class GoPay_API {
 	 */
 	public static function create_payment( ?string $gopay_payment_method, array $order,
 	                                       string $end_date, array $options, array $items,
-	                                       array $callback, float $currency_value, array $data ) : Response {
+	                                       array $callback, float $total, array $data ) : Response {
 
 		$gopay = \GoPay_API::auth_gopay( $options );
 
@@ -177,7 +177,6 @@ class GoPay_API {
 			$language = $options['payment_gopay_default_language'];
 		}
 
-		$total = ( $order['total'] * $currency_value ) * 100;
 		$data  = array(
 			'payer'             => $payer,
 			'amount'            => $total,

@@ -273,6 +273,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			(int)$order_id )->row;
 
 		$end_date = $this->calculate_subscription_end_date( $subscription );
+		$total    = $this->currency->format( $order['total'] , $this->session->data['currency'], 0, false ) * 100;
 
 		$response = \GoPay_API::create_payment(
 			$gopay_payment_method,
@@ -281,7 +282,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$options,
 			$items,
 			$callback,
-			$currency_value,
+			$total,
 			$this->session->data
 		);
 
