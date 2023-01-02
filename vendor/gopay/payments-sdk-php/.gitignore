@@ -1,0 +1,10 @@
+# IDE
+/nbproject/
+.idea
+
+# APP
+/vendor/
+/bin/
+!/bin/jenkins.sh
+/var/
+/phpunit.xml

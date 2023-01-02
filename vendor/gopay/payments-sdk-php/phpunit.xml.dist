@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit
+    backupGlobals               = "false"
+    backupStaticAttributes      = "false"
+    colors                      = "true"
+    convertErrorsToExceptions   = "true"
+    convertNoticesToExceptions  = "true"
+    convertWarningsToExceptions = "true"
+    processIsolation            = "false"
+    stopOnFailure               = "false"
+    syntaxCheck                 = "false"
+    bootstrap                   = "./vendor/autoload.php" >
+
+    <testsuites>
+        <testsuite name="Unit tests">
+            <directory>./tests/unit/</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <env name="goid" value="" />
+        <env name="clientId" value="" />
+        <env name="clientSecret" value="" />
+    </php>
+
+</phpunit>
