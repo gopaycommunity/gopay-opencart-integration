@@ -429,17 +429,31 @@ class GoPay_API {
 					self::update_subscription_status( $controller->config->get( 'config_subscription_active_status_id' ),
 						$subscription['subscription_id'], $controller );
 
-					if ( $subscription['trial_remaining'] ) {
+					if ( $subscription['trial_status'] && $subscription['trial_remaining'] ) {
 						self::update_trial_remaining( $subscription['trial_remaining'] - 1,
 							$subscription['subscription_id'], $controller );
+
+						$trial_cycle     = $subscription['trial_cycle'];
+						$trial_frequency = $subscription['trial_frequency'];
+						if ( $trial_frequency == 'semi_month' ) {
+							$trial_cycle    *= 15;
+							$trial_frequency = 'day';
+						}
 						self::update_date_next( date('Y-m-d', strtotime('+' .
-							$subscription['trial_cycle'] . ' ' . $subscription['trial_frequency'] ) ),
+							$trial_cycle . ' ' . $trial_frequency ) ),
 							$subscription['subscription_id'], $controller );
-					} elseif ( $subscription['remaining'] ) {
+					} elseif ( $subscription['status'] && $subscription['remaining'] ) {
 						self::update_remaining( $subscription['remaining'] - 1,
 							$subscription['subscription_id'], $controller );
+
+						$cycle     = $subscription['cycle'];
+						$frequency = $subscription['frequency'];
+						if ( $frequency == 'semi_month' ) {
+							$cycle    *= 15;
+							$frequency = 'day';
+						}
 						self::update_date_next( date('Y-m-d', strtotime('+' .
-							$subscription['cycle'] . ' ' . $subscription['frequency'] ) ),
+							$cycle . ' ' . $frequency ) ),
 							$subscription['subscription_id'], $controller );
 					}
 				}

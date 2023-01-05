@@ -203,13 +203,30 @@ class GoPay extends \Opencart\System\Engine\Controller {
 				$subscription['duration'] == 0) {
 				$end_date = 0;
 			} else {
-				$trial_duration  = $subscription['trial_duration'] * $subscription['trial_cycle'];
-				$trial_strtotime = strtotime( '+' . $trial_duration . ' '
-					. $subscription['trial_frequency'] . ( $trial_duration > 1 ? 's' : '') );
+				$trial_strtotime = 0;
+				if ( $subscription['trial_status'] ) {
+					$trial_duration  = $subscription['trial_duration'] * $subscription['trial_cycle'];
+					$trial_frequency = $subscription['trial_frequency'];
+					if ( $trial_frequency == 'semi_month' ) {
+						$trial_duration *= 15;
+						$trial_frequency = 'day';
+					}
+					$trial_strtotime = strtotime( '+' . $trial_duration . ' '
+						. $trial_frequency . ( $trial_duration > 1 ? 's' : '') );
+				}
 
-				$duration  = $subscription['duration'] * $subscription['cycle'];
-				$strtotime = strtotime( '+' . $duration . ' '
-					. $subscription['frequency'] . ( $duration > 1 ? 's' : ''), $trial_strtotime );
+				$strtotime = $trial_strtotime;
+				if ( $subscription['status'] ) {
+					$duration  = $subscription['duration'] * $subscription['cycle'];
+					$frequency = $subscription['frequency'];
+					if ( $frequency == 'semi_month' ) {
+						$duration *= 15;
+						$frequency = 'day';
+					}
+					$strtotime = strtotime( '+' . $duration . ' '
+						. $frequency . ( $duration > 1 ? 's' : ''),
+						$trial_strtotime ? $trial_strtotime : date_timestamp_get( date_create() ) );
+				}
 
 				$end_date = date( 'Y-m-d', $strtotime );
 			}
