@@ -13,10 +13,11 @@ class GoPay extends \Opencart\System\Engine\Model {
 
 		$products = $this->cart->getProducts();
 		if ( count( $products ) == 1 && $products[0]['subscription'] ) {
-			$payment_methods = $this->model_setting_setting->getValue( 'payment_gopay_payment_methods' );
-			if ( $payment_methods && !in_array( 'PAYMENT_CARD', json_decode( $payment_methods ) ) ) {
-				return [];
-			}
+			return [];
+//			$payment_methods = $this->model_setting_setting->getValue( 'payment_gopay_payment_methods' );
+//			if ( $payment_methods && !in_array( 'PAYMENT_CARD', json_decode( $payment_methods ) ) ) {
+//				return [];
+//			}
 		}
 
 		return $this->is_available() ? [
