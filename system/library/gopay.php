@@ -469,6 +469,7 @@ class GoPay_API {
 							$gopay_payment_method, true );
 					}
 				}
+				$controller->cart->clear();
 				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
 
 				break;

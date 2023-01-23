@@ -303,9 +303,8 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$this->session->data
 		);
 
-		// Clear cart and remove Order id from session to create a new one
+		// Remove Order id from session to create a new one
 		unset( $this->session->data['order_id'] );
-		$this->cart->clear();
 
 		// Save log.
 		$log = array(
