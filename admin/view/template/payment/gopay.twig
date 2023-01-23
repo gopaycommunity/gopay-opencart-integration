@@ -73,6 +73,16 @@
                             </div>
                         </div>
                         <div class="row mb-3">
+                            <label for="input-inline" class="col-sm-2 col-form-label">{{ gopay_inline }}</label>
+                            <div class="col-sm-10">
+                                <div class="form-check form-switch form-switch-lg">
+                                    <input type="hidden" name="payment_gopay_inline" value="0"/>
+                                    <input type="checkbox" name="payment_gopay_inline" value="1" id="input-inline" class="form-check-input"{% if payment_gopay_inline %} checked{% endif %}/>
+                                </div>
+                                <p>{{ gopay_inline_tooltip }}</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
                             <label for="input-title" class="col-sm-2 col-form-label">{{ gopay_title }}</label>
                             <div class="col-sm-10">
                                 <input type="text" name="payment_gopay_title" value="{{ payment_gopay_title }}" placeholder="{{ gopay_title_placeholder }}" title="{{ gopay_title_tooltip }}" id="input-title" class="form-control"/>
