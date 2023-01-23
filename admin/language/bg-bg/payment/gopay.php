@@ -9,6 +9,7 @@ $_['text_success']                    = 'Платежният модул GoPay �
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Активиране/деактивиране';
+$_['gopay_inline']                    = 'Вграден шлюз за плащане';
 $_['gopay_title']                     = 'Заглавие';
 $_['gopay_description']               = 'Описание';
 $_['gopay_goid']                      = 'GoID';
@@ -32,6 +33,7 @@ $_['gopay_client_secret_placeholder'] = 'Поставете тайния ток�
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'Активиране на шлюза за плащане GoPay.';
+$_['gopay_inline_tooltip']            = 'Вграденият шлюз за плащане се инициира директно над точката на продажба.';
 $_['gopay_title_tooltip']             = 'Името на метода на плащане, което се показва на касата.';
 $_['gopay_description_tooltip']       = 'Описание на метода на плащане, което се показва на касата.';
 $_['gopay_goid_tooltip']              = 'Въведете своя уникален GoID, който можете да намерите в настройките на профила си в GoPay.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> Повече информация</a>.';

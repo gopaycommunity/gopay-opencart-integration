@@ -9,6 +9,7 @@ $_['text_success']                    = 'Moduł płatności GoPay został pomyś
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Włączanie/wyłączanie';
+$_['gopay_inline']                    = 'Bramka płatności inline';
 $_['gopay_title']                     = 'Tytuł';
 $_['gopay_description']               = 'Opis';
 $_['gopay_goid']                      = 'GoID';
@@ -32,6 +33,7 @@ $_['gopay_client_secret_placeholder'] = 'Wprowadź swój tajny token klienta GoP
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'Włącz bramę płatności GoPay.';
+$_['gopay_inline_tooltip']            = 'Bramka płatności inline jest inicjowana bezpośrednio nad punktem sprzedaży.';
 $_['gopay_title_tooltip']             = 'Nazwa metody płatności, która jest wyświetlana w kasie.';
 $_['gopay_description_tooltip']       = 'Opis metody płatności wyświetlany przy kasie.';
 $_['gopay_goid_tooltip']              = 'Wprowadź swój unikalny identyfikator GoID, który można znaleźć w ustawieniach konta GoPay.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> Więcej informacji</a>.';

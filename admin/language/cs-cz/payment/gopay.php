@@ -9,6 +9,7 @@ $_['text_success']                    = 'Platební modul GoPay byl úspěšně u
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Povolit/zakázat';
+$_['gopay_inline']                    = 'Inline platební brána';
 $_['gopay_title']                     = 'Název';
 $_['gopay_description']               = 'Popis';
 $_['gopay_goid']                      = 'GoID';
@@ -32,6 +33,7 @@ $_['gopay_client_secret_placeholder'] = 'Vložte tajný token klienta GoPay...';
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'Povolení platební brány GoPay.';
+$_['gopay_inline_tooltip']            = 'Inline platební brána se spouští přímo nad prodejním místem.';
 $_['gopay_title_tooltip']             = 'Název způsobu platby, který se zobrazí u pokladny.';
 $_['gopay_description_tooltip']       = 'Popis způsobu platby, který se zobrazí u pokladny.';
 $_['gopay_goid_tooltip']              = 'Zadejte své jedinečné GoID, které najdete v nastavení účtu GoPay.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> Více informací</a>.';

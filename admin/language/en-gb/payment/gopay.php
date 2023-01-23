@@ -9,6 +9,7 @@ $_['text_success']                    = 'GoPay payment module was successfully m
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Enable/Disable';
+$_['gopay_inline']                    = 'Inline payment gateway';
 $_['gopay_title']                     = 'Title';
 $_['gopay_description']               = 'Description';
 $_['gopay_goid']                      = 'GoID';
@@ -32,6 +33,7 @@ $_['gopay_client_secret_placeholder'] = 'Insert Your GoPay Client Secret Token..
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'Enable GoPay payment gateway.';
+$_['gopay_inline_tooltip']            = 'Inline payment gateway is initiated directly above the point of sale.';
 $_['gopay_title_tooltip']             = 'Name of the payment method that is displayed at the checkout.';
 $_['gopay_description_tooltip']       = 'Description of the payment method that is displayed at the checkout.';
 $_['gopay_goid_tooltip']              = 'Enter your unique GoID, which can be found in your GoPay account settings.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> More information</a>.';

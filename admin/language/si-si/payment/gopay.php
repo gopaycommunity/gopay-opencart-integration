@@ -9,6 +9,7 @@ $_['text_success']                    = 'Plačilni modul GoPay je bil uspešno s
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Omogoči/izključi';
+$_['gopay_inline']                    = 'Vmesni plačilni prehod';
 $_['gopay_title']                     = 'Naslov';
 $_['gopay_description']               = 'Opis';
 $_['gopay_goid']                      = 'GoID';
@@ -32,6 +33,7 @@ $_['gopay_client_secret_placeholder'] = 'Vstavite tajni žeton stranke GoPay...'
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'Omogočite plačilni prehod GoPay.';
+$_['gopay_inline_tooltip']            = 'Inline plačilni prehod se sproži neposredno nad prodajnim mestom.';
 $_['gopay_title_tooltip']             = 'Ime načina plačila, ki se prikaže na blagajni.';
 $_['gopay_description_tooltip']       = 'Opis načina plačila, ki se prikaže na blagajni.';
 $_['gopay_goid_tooltip']              = 'Vnesite svoj edinstveni GoID, ki ga najdete v nastavitvah računa GoPay.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> Več informacij</a>.';

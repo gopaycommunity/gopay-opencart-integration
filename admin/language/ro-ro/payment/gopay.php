@@ -9,6 +9,7 @@ $_['text_success']                    = 'Modulul de plată GoPay a fost modifica
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Activare/Dezactivare';
+$_['gopay_inline']                    = 'Poartă de plată în linie';
 $_['gopay_title']                     = 'Titlu';
 $_['gopay_description']               = 'Descriere';
 $_['gopay_goid']                      = 'GoID';
@@ -32,6 +33,7 @@ $_['gopay_client_secret_placeholder'] = 'Introduceți Tokenul secret al clientul
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'Activați gateway-ul de plată GoPay.';
+$_['gopay_inline_tooltip']            = 'Poarta de plată în linie este inițiată direct deasupra punctului de vânzare.';
 $_['gopay_title_tooltip']             = 'Denumirea metodei de plată care este afișată la checkout.';
 $_['gopay_description_tooltip']       = 'Descriere a metodei de plată care este afișată la checkout.';
 $_['gopay_goid_tooltip']              = 'Introduceți GoID-ul dvs. unic, care poate fi găsit în setările contului dvs. GoPay.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> Mai multe informații</a>.';

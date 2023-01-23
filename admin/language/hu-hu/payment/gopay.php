@@ -9,6 +9,7 @@ $_['text_success']                    = 'A GoPay fizetési modult sikeresen mód
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Engedélyezés/Kikapcsolás';
+$_['gopay_inline']                    = 'Inline fizetési átjáró';
 $_['gopay_title']                     = 'Cím';
 $_['gopay_description']               = 'Leírás';
 $_['gopay_goid']                      = 'GoID';
@@ -32,6 +33,7 @@ $_['gopay_client_secret_placeholder'] = 'Adja meg a GoPay ügyfél titkos tokenj
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'A GoPay fizetési átjáró engedélyezése.';
+$_['gopay_inline_tooltip']            = 'Az inline fizetési átjárót közvetlenül az értékesítési pont felett indítják el.';
 $_['gopay_title_tooltip']             = 'A pénztárnál megjelenő fizetési mód neve.';
 $_['gopay_description_tooltip']       = 'A pénztárnál megjelenő fizetési mód leírása.';
 $_['gopay_goid_tooltip']              = 'Adja meg egyedi GoID azonosítóját, amelyet a GoPay-fiók beállításaiban talál.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> További információ</a>.';
