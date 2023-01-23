@@ -326,6 +326,8 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$data['gw_url'] = $response->json['gw_url'];
 		}
 
+		$data['payment_gopay_inline'] = $options['payment_gopay_inline'];
+
 		$this->response->addHeader( 'Content-Type: application/json' );
 		$this->response->setOutput( json_encode( $data ) );
 	}

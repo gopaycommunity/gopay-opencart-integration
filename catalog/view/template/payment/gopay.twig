@@ -87,7 +87,7 @@
                 $('#form-gopay .lds-spinner').addClass('d-none');
 
                 if (json['gw_url']) {
-                    _gopay.checkout({gatewayUrl: json['gw_url'], inline: true});
+                    _gopay.checkout({gatewayUrl: json['gw_url'], inline: json['payment_gopay_inline']});
                 }
                 if (json['failure']) {
                     location = json['failure'];
