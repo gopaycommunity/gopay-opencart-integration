@@ -62,7 +62,7 @@ class GoPay_API {
 		$banks            = array();
 		$enabled_payments = $gopay->getPaymentInstruments( $options['payment_gopay_goid'], $currency );
 
-		if ( 200 == $enabled_payments->statusCode ) {
+		if ( 200 == $enabled_payments->statusCode && isset( $enabled_payments->json['enabledPaymentInstruments'] ) ) {
 			foreach ( $enabled_payments->json['enabledPaymentInstruments'] as $key => $payment_method ) {
 				$payment_methods[ $payment_method['paymentInstrument'] ] = array(
 					'label' => $payment_method['label']['cs'],
