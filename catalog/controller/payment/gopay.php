@@ -72,13 +72,15 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
         // Only supported by the currency.
         $supported_payment_methods = json_decode( $this->model_setting_setting->getValue( 'payment_gopay_payment_methods_' .
-	        $this->session->data['currency'] ), true );
+	        $this->session->data['currency'] ), true ) ?: array();
         $supported_banks           = json_decode( $this->model_setting_setting->getValue( 'payment_gopay_banks_' .
-	        $this->session->data['currency'] ), true );
+	        $this->session->data['currency'] ), true ) ?: array();
 
         // All selected in the settings page.
-        $selected_payment_methods = json_decode( $this->model_setting_setting->getValue( 'payment_gopay_payment_methods' ) );
-        $selected_banks           = json_decode( $this->model_setting_setting->getValue( 'payment_gopay_banks' ) );
+        $selected_payment_methods = json_decode(
+			$this->model_setting_setting->getValue( 'payment_gopay_payment_methods' ) ) ?: array();
+        $selected_banks           = json_decode(
+			$this->model_setting_setting->getValue( 'payment_gopay_banks' ) ) ?: array();
 
         // Intersection of all selected and the supported by the currency.
         $payment_methods = array_intersect_key(
