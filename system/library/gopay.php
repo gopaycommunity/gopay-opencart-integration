@@ -474,6 +474,21 @@ class GoPay_API {
 
 				break;
 			case 'PAYMENT_METHOD_CHOSEN':
+				if ( $subscription ) {
+					self::update_subscription_status( $controller->config->get( 'config_subscription_status_id' ),
+						$subscription['subscription_id'], $controller );
+					self::update_subscription_history_status( $controller->config->get( 'config_subscription_status_id' ),
+						$subscription['subscription_id'], $controller );
+				}
+
+				if ( !self::get_order_history( $order_id, 1, $controller ) ) {
+					$controller->model_checkout_order->addHistory( $order_id, 1, 'GoPay payment method = ' .
+						$gopay_payment_method, true );
+				}
+				$controller->cart->clear();
+				$controller->response->redirect( $controller->url->link( 'checkout/success', '', 'SSL' ) );
+
+				break;
 			case 'CREATED':
 			case 'TIMEOUTED':
 			case 'CANCELED':
