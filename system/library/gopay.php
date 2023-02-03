@@ -146,11 +146,12 @@ class GoPay_API {
 		if ( !empty( $default_payment_instrument ) ) {
 			$payer = array(
 				'default_payment_instrument'  => $default_payment_instrument,
-				'allowed_payment_instruments' => $options['payment_gopay_payment_methods'],
-				'allowed_swifts'              => $options['payment_gopay_banks'],
+				'allowed_payment_instruments' => $options['payment_gopay_payment_methods'] ?? array(),
+				'allowed_swifts'              => $options['payment_gopay_banks'] ?? array(),
 				'contact'                     => $contact,
 			);
 			if ( ! empty( $default_swift ) ) {
+				unset( $payer['allowed_swifts'] );
 				$payer['default_swift'] = $default_swift;
 			}
 		} else {
