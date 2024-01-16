@@ -38,6 +38,33 @@ Running project on local machine for development and testing purposes.
 - [Docker Compose](https://docs.docker.com/compose/) _(is part of Docker Desktop)_
 
 ### Instalation
+1. Download and rename the extension:
+- Visit the GitHub repository of the GoPay extension.
+- Download the latest version of the extension to your device.
+- Rename the downloaded file to `opencart_gopay.ocmod`.
+2. Plugin Compression:
+- Create an archive of the extension using compression.
+- Archive the entire file as a .zip file.
+- The entire installation file is named as `opencart_gopay.ocmod.zip`.
+3. Uploading the extension to OpenCart:
+- Log in to the OpenCart administrative interface.
+- Navigate to Extensions -> Installer.
+- Upload the compressed extension (.zip file) to the system.
+4. Extension Installation:
+- After successful upload, go to Extensions -> Payments -> Payment Method.
+- The extension type has been configured as Payments, and locate GoPay within the list.
+- Click the Install button next to the GoPay extension.
+5. Activating the extension:
+- After installation, go to Extensions -> Payments.
+- Activate the GoPay extension by clicking the Edit button next to it and selecting Enabled.
+6. Configuring the extension:
+- Navigate to Extensions -> Payments.
+- Click Edit next to the GoPay extension.
+- Fill in the required information such as GoID, ClientID, Secret, etc.
+- Save the changes.
+7. Summary:
+- Verify that the GoPay extension is now active and correctly configured.
+- Test the payment functionality and ensure that all details were entered correctly.
 
 ### Run project
 
