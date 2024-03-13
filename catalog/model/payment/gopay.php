@@ -27,6 +27,37 @@ class GoPay extends \Opencart\System\Engine\Model {
 		] : [];
 	}
 
+	public function getMethods(array $address = []): array {
+
+		if ( empty( $this->model_setting_setting->getValue( 'payment_gopay_goid' ) ) ||
+		empty( $this->model_setting_setting->getValue( 'payment_gopay_client_id' ) ) ||
+		empty( $this->model_setting_setting->getValue( 'payment_gopay_client_secret' ) )
+		) {
+			return [];
+		}
+
+		$products = $this->cart->getProducts();
+		if ( count( $products ) == 1 && current($products)['subscription'] ) {
+			return [];
+		}
+
+		$method_data = [];
+
+		$option_data['gopay'] = [
+			'code' => 'gopay.gopay',
+			'name' => $this->model_setting_setting->getValue( 'payment_gopay_title' )
+		];
+
+		$method_data = [
+			'code'       => 'gopay',
+			'name'       => $this->model_setting_setting->getValue( 'payment_gopay_title' ),
+			'option'     => $option_data,
+			'sort_order' => 6
+		];
+		
+		return $method_data;
+	}
+
 	/**
 	 * Is the gateway available based on the restrictions
 	 * of countries and shipping methods.
