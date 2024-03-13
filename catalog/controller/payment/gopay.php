@@ -53,7 +53,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 				}
 			}
 		} else {
-			if ( $products[0]['quantity'] > 1 && $products[0]['subscription'] ) {
+			if ( current($products)['quantity'] > 1 && current($products)['subscription'] ) {
 				return true;
 			}
 		}
@@ -93,7 +93,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
 		// Check if subscription - only card payment is enabled.
 		$products = $this->cart->getProducts();
-		if ( $products[0]['subscription'] ) {
+		if ( current($products)['subscription'] ) {
 			if ( array_key_exists( 'PAYMENT_CARD', (array) $payment_methods ) ) {
 				$payment_methods = array( 'PAYMENT_CARD' => $payment_methods['PAYMENT_CARD'] );
 			} else {
