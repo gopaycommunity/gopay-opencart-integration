@@ -28,7 +28,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 				$this->session->data['user_token'] )
 		];
 
-		$data['save'] = $this->url->link( 'extension/opencart_gopay/payment/gopay|save', 'user_token=' .
+		$data['save'] = $this->url->link( 'extension/opencart_gopay/payment/gopay.save', 'user_token=' .
 			$this->session->data['user_token'] );
 		$data['back'] = $this->url->link( 'marketplace/extension', 'user_token=' . $this->session->data['user_token']
 			. '&type=payment' );
@@ -131,7 +131,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 				'code'        => 'add_gopay_to_column_left',
 				'description' => 'Create GoPay Menu',
 				'trigger'     => 'admin/view/common/column_left/before',
-				'action'      => 'extension/opencart_gopay/menu/gopay|menus',
+				'action'      => 'extension/opencart_gopay/menu/gopay.menus',
 				'status'      => 1,
 				'sort_order'  => 1,
 			)
@@ -142,8 +142,8 @@ class GoPay extends \Opencart\System\Engine\Controller
 			array(
 				'code'        => 'change_order_history_info_page',
 				'description' => 'Change order history info page',
-				'trigger'     => 'catalog/controller/account/order|info/after',
-				'action'      => 'extension/opencart_gopay/account/gopay|info',
+				'trigger'     => 'catalog/controller/account/order.info/after',
+				'action'      => 'extension/opencart_gopay/account/gopay.info',
 				'status'      => 1,
 				'sort_order'  => 1,
 			)
@@ -154,8 +154,8 @@ class GoPay extends \Opencart\System\Engine\Controller
 			array(
 				'code'        => 'change_sale_order_info_page',
 				'description' => 'Change sale order info page',
-				'trigger'     => 'admin/controller/sale/order|info/after',
-				'action'      => 'extension/opencart_gopay/sale/gopay|info',
+				'trigger'     => 'admin/controller/sale/order.info/after',
+				'action'      => 'extension/opencart_gopay/sale/gopay.info',
 				'status'      => 1,
 				'sort_order'  => 1,
 			)

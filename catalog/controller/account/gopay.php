@@ -21,7 +21,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 				$this->config->get( 'config_language' ) ) );
 		}
 
-		$data['order_info'] = $this->response->getOutput( 'account/order|info' );
+		$data['order_info'] = $this->response->getOutput( 'account/order.info' );
 
 		if ( array_key_exists( 'order_id', $this->request->get ) ) {
 			$order_id = (int)$this->request->get['order_id'];

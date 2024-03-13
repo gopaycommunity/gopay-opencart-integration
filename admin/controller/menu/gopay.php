@@ -13,14 +13,14 @@ class GoPay extends \Opencart\System\Engine\Controller
 
 		$gopay[] = [
 			'name'	   => 'Info',
-			'href'     => $this->url->link( 'extension/opencart_gopay/menu/gopay|info', 'user_token=' .
+			'href'     => $this->url->link( 'extension/opencart_gopay/menu/gopay.info', 'user_token=' .
 				$this->session->data['user_token'] ),
 			'children' => []
 		];
 
 		$gopay[] = [
 			'name'	   => 'Log',
-			'href'     => $this->url->link( 'extension/opencart_gopay/menu/gopay|log', 'user_token=' .
+			'href'     => $this->url->link( 'extension/opencart_gopay/menu/gopay.log', 'user_token=' .
 				$this->session->data['user_token'] ),
 			'children' => []
 		];
@@ -70,7 +70,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 
 		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
 		$data['log_page'] = $this->model_extension_opencart_gopay_payment_gopay->get_log_data();
-		$data['order_url'] = $this->url->link( 'sale/order|info',
+		$data['order_url'] = $this->url->link( 'sale/order.info',
 			'user_token=' . $this->session->data['user_token'] . '&order_id=');
 
 		$data['header']      = $this->load->controller( 'common/header' );
