@@ -37,5 +37,4 @@ return array(
     'GoPay\\Token\\CachedOAuth' => $vendorDir . '/gopay/payments-sdk-php/src/Token/CachedOAuth.php',
     'GoPay\\Token\\InMemoryTokenCache' => $vendorDir . '/gopay/payments-sdk-php/src/Token/InMemoryTokenCache.php',
     'GoPay\\Token\\TokenCache' => $vendorDir . '/gopay/payments-sdk-php/src/Token/TokenCache.php',
-    'Normalizer' => $vendorDir . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
 );
