@@ -27,6 +27,9 @@ class Log {
 	 * @since  1.0.0
 	 */
 	public static function insert_log( $controller, array $log ) {
+		$encodedLog = (is_string($log['log']) && json_decode($log['log']) === null && json_last_error() !== JSON_ERROR_NONE)
+			? json_encode($log['log'])
+			: $log['log'];
 
 		$table_name = "gopay_log";
 		$data       = array(
@@ -35,7 +38,7 @@ class Log {
 			'message'        => $log['message'],
 			'created_at'     => gmdate( 'Y-m-d H:i:s' ),
 			'log_level'      => $log['log_level'],
-			'log'            => json_encode( $log['log'] ),
+			'log'            => $encodedLog,
 		);
 		$where      = "`order_id` = '" . $log['order_id'] .
 			"' AND `transaction_id` = '" . $log['transaction_id'] .
