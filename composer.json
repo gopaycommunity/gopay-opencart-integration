@@ -1,6 +1,6 @@
 {
   "require": {
-    "gopay/payments-sdk-php": "1.4.3",
+    "gopay/payments-sdk-php": "1.7.0",
     "guzzlehttp/guzzle": "6.5.8"
   }
 }

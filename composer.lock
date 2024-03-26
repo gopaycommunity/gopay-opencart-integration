@@ -4,24 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "756fcd6ca0aba9ef8cc242f590c066a9",
+    "content-hash": "f7ca5dabd7824a4ba8f7f39a9836f51e",
     "packages": [
         {
             "name": "gopay/payments-sdk-php",
-            "version": "v1.4.3",
+            "version": "v1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gopaycommunity/gopay-php-api.git",
-                "reference": "c0d0c5c397d8e93095a54cbd5d528de0badcf808"
+                "reference": "f9baf80cea928e9ea30b5dcdf4c21f1f9e0ef946"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gopaycommunity/gopay-php-api/zipball/c0d0c5c397d8e93095a54cbd5d528de0badcf808",
-                "reference": "c0d0c5c397d8e93095a54cbd5d528de0badcf808",
+                "url": "https://api.github.com/repos/gopaycommunity/gopay-php-api/zipball/f9baf80cea928e9ea30b5dcdf4c21f1f9e0ef946",
+                "reference": "f9baf80cea928e9ea30b5dcdf4c21f1f9e0ef946",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/guzzle": "^5.3.1|^6.2.1",
+                "guzzlehttp/guzzle": "^6.2.1|7.*",
                 "php": ">=7.4"
             },
             "require-dev": {
@@ -62,9 +62,9 @@
             ],
             "support": {
                 "issues": "https://github.com/gopaycommunity/gopay-php-api/issues",
-                "source": "https://github.com/gopaycommunity/gopay-php-api/tree/v1.4.3"
+                "source": "https://github.com/gopaycommunity/gopay-php-api/tree/v1.7.0"
             },
-            "time": "2020-08-13T12:23:42+00:00"
+            "time": "2023-05-17T16:12:51+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

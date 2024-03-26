@@ -18,7 +18,7 @@ class OAuth2 implements Auth
     {
         $credentials = "{$this->gopay->getConfig('clientId')}:{$this->gopay->getConfig('clientSecret')}";
         $response = $this->gopay->call(
-            'oauth2/token',
+            '/oauth2/token',
             GoPay::FORM,
             'Basic ' . base64_encode($credentials),
             RequestMethods::POST,
@@ -37,7 +37,7 @@ class OAuth2 implements Auth
     {
         $ids = [
             $this->gopay->getConfig('clientId'),
-            (int) $this->gopay->getConfig('isProductionMode'),
+            $this->gopay->isCustomGatewayUrl() ? 2 : (int) $this->gopay->getConfig('isProductionMode'),
             $this->gopay->getConfig('scope'),
         ];
         return implode('-', $ids);
