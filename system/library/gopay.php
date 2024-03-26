@@ -32,6 +32,11 @@ class GoPay_API {
 	 * @since  1.0.0
 	 */
 	public static function auth_gopay( $options ): Payments {
+		static $urls = [
+			true => 'https://gate.gopay.cz/',
+			false => 'https://gw.sandbox.gopay.com/'
+		];
+
 		return GoPay\payments(
 			array(
 				'goid'             => $options['payment_gopay_goid'],
@@ -42,6 +47,7 @@ class GoPay_API {
 				'language'         => array_key_exists( 'payment_gopay_default_language', $options ) ?
 					$options['payment_gopay_default_language'] : 'EN',
 				'timeout'          => 30,
+				'gatewayUrl' => $urls[!$options['payment_gopay_test']],
 			)
 		);
 	}
