@@ -8,9 +8,9 @@ class ComposerStaticInit2d59d844a933cf6c317c96c732b75e9d
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'a9b805bf529b5a997093b3cddca2af6f' => __DIR__ . '/..' . '/gopay/payments-sdk-php/factory.php',
     );
@@ -67,7 +67,6 @@ class ComposerStaticInit2d59d844a933cf6c317c96c732b75e9d
         'GoPay\\Definition\\Payment\\PaymentInstrument' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Definition/Payment/PaymentInstrument.php',
         'GoPay\\Definition\\Payment\\PaymentItemType' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Definition/Payment/PaymentItemType.php',
         'GoPay\\Definition\\Payment\\Recurrence' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Definition/Payment/Recurrence.php',
-        'GoPay\\Definition\\Payment\\VatRate' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Definition/Payment/VatRate.php',
         'GoPay\\Definition\\RequestMethods' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Definition/RequestMethods.php',
         'GoPay\\Definition\\Response\\PaymentStatus' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Definition/Response/PaymentStatus.php',
         'GoPay\\Definition\\Response\\PaymentSubStatus' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Definition/Response/PaymentSubStatus.php',
@@ -84,7 +83,6 @@ class ComposerStaticInit2d59d844a933cf6c317c96c732b75e9d
         'GoPay\\Http\\Response' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Http/Response.php',
         'GoPay\\OAuth2' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/OAuth2.php',
         'GoPay\\Payments' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Payments.php',
-        'GoPay\\PaymentsSupercash' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/PaymentsSupercash.php',
         'GoPay\\Token\\AccessToken' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Token/AccessToken.php',
         'GoPay\\Token\\CachedOAuth' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Token/CachedOAuth.php',
         'GoPay\\Token\\InMemoryTokenCache' => __DIR__ . '/..' . '/gopay/payments-sdk-php/src/Token/InMemoryTokenCache.php',
