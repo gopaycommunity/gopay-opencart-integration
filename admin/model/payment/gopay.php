@@ -47,7 +47,7 @@ class GoPay extends \Opencart\System\Engine\Model {
                 REGEXP '[\w\W]*%s[\w\W]*'",
 			DB_PREFIX,
 			'gopay_log',
-			strtoupper( $log_table_filter )
+			isset($log_table_filter) ? strtoupper($log_table_filter) : ''
 		) )->rows;
 
 		$results_per_page = 20;
@@ -65,7 +65,7 @@ class GoPay extends \Opencart\System\Engine\Model {
                 REGEXP '[\w\W]*%s[\w\W]*' ORDER BY created_at DESC LIMIT %d,%d",
 				DB_PREFIX,
 				'gopay_log',
-				strtoupper( $log_table_filter ),
+				isset($log_table_filter) ? strtoupper($log_table_filter) : '',
 				$page_pagination,
 				$results_per_page
 			)
