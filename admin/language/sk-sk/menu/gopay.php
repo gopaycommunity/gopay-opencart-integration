@@ -8,7 +8,7 @@ $_['settings']           = 'Nastavenia';
 
 # Info
 $_['plugin_name'] = 'OpenCart GoPay gateway';
-$_['version']     = '1.0.0';
+$_['version']     = '1.0.1';
 $_['description'] = 'Integrácia platobnej brány OpenCart a GoPay.';
 $_['author']      = 'GoPay';
 
