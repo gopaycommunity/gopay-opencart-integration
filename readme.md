@@ -4,16 +4,20 @@
 
 - [About the Project](#about-the-project)
     - [Built With](#built-with)
+- [Changelog](#changelog)
 - [Development](#development)
     - [Prerequisites](#prerequisites)
     - [Installation](#instalation)
     - [Run project](#run-project)
     - [Project Structure](#project-structure)
-    - [Migrations](#migrations)
-    - [Dependencies](#dependencies)
     - [Testing](#testing)
 - [Versioning](#versioning)
+    - [Contribution](#contribution)
+    - [Contribution process in details](#contribution-process-in-details)
 - [Deployment](#deployment)
+- [Internationalization](#internationalization)
+    - [Add new language](#add-new-language)
+    - [Update an existing language](#update-an-existing-language)
 - [Documentation](#documentation)
 - [Other useful links](#other-useful-links)
 
@@ -26,6 +30,13 @@ GoPay payment gateway integration with the OpenCart eCommerce platform.
 - [GoPay's PHP SDK for Payments REST API](https://github.com/gopaycommunity/gopay-php-api)
 - [Composer](https://getcomposer.org/)
 
+## Changelog
+### 1.0.0
+- OpenCart and GoPay gateway integration.
+
+### 1.0.1
+- Update GoPay extension to support latest OpenCart from v4.0.2.0 to v4.0.2.3
+
 ## Development
 
 Running project on local machine for development and testing purposes.
@@ -34,18 +45,16 @@ Running project on local machine for development and testing purposes.
 
 - [PHP](https://www.php.net)
 - [OpenCart](https://www.opencart.com)
-- [Docker Desktop](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/) _(is part of Docker Desktop)_
 
 ### Instalation
 1. Download and rename the extension:
 - Visit the GitHub repository of the GoPay extension.
 - Download the latest version of the extension to your device.
-- Rename the downloaded file to `opencart_gopay.ocmod`.
+- Extract the source file and rename it to `opencart_gopay.ocmod`.
 2. Plugin Compression:
 - Create an archive of the extension using compression.
-- Archive the entire file as a .zip file.
-- The entire installation file is named as `opencart_gopay.ocmod.zip`.
+- Archive the entire folder as a .zip file.
+- The whole installation file is named as `opencart_gopay.ocmod.zip`.
 3. Uploading the extension to OpenCart:
 - Log in to the OpenCart administrative interface.
 - Navigate to Extensions -> Installer.
@@ -94,27 +103,22 @@ For local project execution, first install OpenCart, then upload and configure t
 - **`install.json`**
 - **`composer.json`**
 
-### Migrations
-
-### Dependencies
-
-Use Composer inside Docker container to install or upgrade dependencies.
-
-Run docker-compose.
-
-```sh
-make run-dev
-```
-
-Run update.
-
-```sh
-make update
-```
-
-See `makefile` for more commands.
-
 ### Testing
+1. Perform test transactions: Execute a variety of test transactions using different scenarios. Access the URL provided for all product [requirements](https://argo22.atlassian.net/wiki/spaces/GPY020/pages/2932703233/Product+requirements). Verify that the plugin accurately handles each scenario and delivers the correct behavior to the end-user.
+
+2. Debug log: Use monitoring tools within the OpenCart environment. Access the Error Log in the right panel under System > Maintenance > Error Logs. Alternatively, you can find it at `/system/storage/logs/error.log`. This tool is valuable for debugging and logging purposes.
+
+3. Check order processing: After completing test transactions, verify that orders are processed correctly within OpenCart. Ensure that order details, payment statuses, and transaction logs are accurately recorded and reflected in the OpenCart admin panel.
+
+4. Inspect and review the log: Inspect the log file which often contains valuable information regarding errors, warnings, and other debug messages generated during the testing process. Pay close attention to any entries related to the functionality being tested.
+
+5. Review transaction logs: In the OpenCart admin panel, navigate to the payment gateway's log section for comprehensive transaction insights. This dedicated log section provides detailed records of all transactions processed through the payment gateway, offering valuable insights into payment statuses, transaction IDs, timestamps, and any potential errors encountered during the payment process.
+
+6. Test compatibility: Ensuring compatibility with OpenCart is our primary objective during the development and testing phases of the plugin. However, due to the diverse ecosystem of OpenCart extensions and the unique configurations that users may employ, we cannot guarantee seamless compatibility with every extension or user setting.
+
+7. Review error handling: Test the plugin's error handling capabilities by deliberately triggering errors, such as invalid payment credentials or network timeouts. Verify that error messages are clear, expected, and guide users toward resolution steps.
+
+8. Note test results: Record your test findings, noting any issues like unexpected behaviors, warnings, errors, deprecated functions, and identified bugs along with their solutions. Keep detailed test notes for future reference and troubleshooting.
 
 ## Versioning
 
