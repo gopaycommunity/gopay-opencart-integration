@@ -1,0 +1,20 @@
+name: Create release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Package plugin
+        run: |
+          zip -r opencart_gopay.ocmod.zip *
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: opencart_gopay.ocmod.zip
