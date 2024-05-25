@@ -13,8 +13,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Package plugin
         run: |
-          zip -r opencart_gopay-${{ github.ref_name }}.ocmod.zip *
+          zip -r opencart_gopay.ocmod.zip *
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: opencart_gopay-${{ github.ref_name }}.ocmod.zip
+          files: opencart_gopay.ocmod.zip
