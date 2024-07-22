@@ -108,7 +108,7 @@ class GoPay extends \Opencart\System\Engine\Controller {
                     <input class="payment_method_oc_gopay_gateway_input" name="gopay_payment_method" type="radio" id="%s" value="%s" %s />
                     <span>%s</span>
                 </div>
-                <img src="%s" alt="ico" style="height: auto; width: auto; margin-left: auto;"/>
+                <img src="%s" alt="ico" style="height: auto; max-height: 30px; width: auto; margin-left: auto;"/>
                 </div>';
 
         foreach ( $payment_methods as $payment_method => $payment_method_label_image ) {
