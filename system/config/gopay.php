@@ -23,6 +23,8 @@ $_['gopay_setting'] = array(
 		'PAYSAFECARD'  => array( 'label' => 'PaySafeCard coupon' ),
 		'BITCOIN'      => array( 'label' => 'Bitcoin wallet' ),
 		'CLICK_TO_PAY' => array( 'label' => 'Click to Pay' ),
+		'TWISTO'       => array( 'label' => 'Twisto' ),
+		'SKIPPAY'      => array( 'label' => 'Skip Pay' ),
 	),
 	'banks' => array(
 		'GIBACZPX'     => array( 'label' => 'Česká Spořitelna', 'country' => 'CZ' ),
