@@ -55,7 +55,7 @@ class GoPay extends \Opencart\System\Engine\Model {
 			'sort_order' => 6
 		];
 		
-		return $method_data;
+		return $this->is_available() ? $method_data : [];
 	}
 
 	/**
@@ -108,12 +108,24 @@ class GoPay extends \Opencart\System\Engine\Model {
 			}
 
 			// Check shipping methods.
-			if ( $this->cart->hasShipping() && !$all_virtual_downloadable ) {
-				$shipping_methods = json_decode( $this->model_setting_setting->getValue( 'payment_gopay_shipping_methods' ) );
-				if ( array_key_exists( 'shipping_method', $this->session->data ) &&
-					!in_array( explode( '.', $this->session->data['shipping_method'] )[0],
-						$shipping_methods ) ) {
-					return false;
+			if ($this->cart->hasShipping() && !$all_virtual_downloadable) {
+				$shipping_methods = json_decode($this->model_setting_setting->getValue('payment_gopay_shipping_methods'));
+
+				if (isset($this->session->data['shipping_method'])) {
+					$shipping_method = $this->session->data['shipping_method'];
+
+					if (is_string($shipping_method)) {
+						$shipping_method_code = explode('.', $shipping_method)[0];
+					} 
+					elseif (is_array($shipping_method) && isset($shipping_method['code'])) {
+						$shipping_method_code = explode('.', $shipping_method['code'])[0];
+					} else {
+						$shipping_method_code = null;
+					}
+
+					if (!empty($shipping_method_code) && !in_array($shipping_method_code, $shipping_methods, true)) {
+						return false;
+					}
 				}
 			}
 			// end check shipping methods.
