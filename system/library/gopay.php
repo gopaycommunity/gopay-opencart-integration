@@ -174,6 +174,10 @@ class GoPay_API {
 			array(
 				'name'  => 'order_id',
 				'value' => array_key_exists( 'order_id', $data ) ? $data['order_id'] : $order['order_id'],
+			),
+			array(
+				'name'  => 'gopay_plugin',
+				'value' => 'gopay-opencart',
 			) );
 
 		$language = 'EN';
