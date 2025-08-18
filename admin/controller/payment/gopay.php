@@ -344,8 +344,11 @@ class GoPay extends \Opencart\System\Engine\Controller
 
 		$setting = $_config->get( 'gopay_setting' );
 
+		$language_code = $this->config->get( 'config_language' );
+		$language_code = strstr($language_code, '-', true) ?: $language_code;
+
 		foreach ( $setting['currencies'] as $currency => $value ) {
-			$supported       = \GoPay_API::check_enabled_on_gopay( $currency, $options );
+			$supported       = \GoPay_API::check_enabled_on_gopay( $currency, $options, $language_code );
 			$payment_methods = $payment_methods + $supported[0];
 			$banks           = $banks + $supported[1];
 
