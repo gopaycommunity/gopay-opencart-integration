@@ -38,7 +38,13 @@ GoPay payment gateway integration with the OpenCart eCommerce platform.
 - Update GoPay extension to support latest OpenCart from v4.0.2.0 to v4.0.2.3
 
 ### 1.0.2
+The new release comes with the following features:
 - Update GoPay extension to support OpenCart up to 4.1.0.3.
+- Fixed availability of payment methods
+- Removed unnecessary vendor folder
+- Added some new payment methods
+- Updated payment logos
+- Implemented new approach for payment method translations
 
 ## Development
 
