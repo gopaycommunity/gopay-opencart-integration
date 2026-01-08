@@ -170,6 +170,15 @@ class GoPay_API {
 			);
 		}
 
+		$manifest = DIR_EXTENSION . 'opencart_gopay/install.json';
+
+		$version = null;
+
+		if (is_file($manifest)) {
+			$data = json_decode(file_get_contents($manifest), true);
+			$version = $data['version'] ?? null;
+		}
+
 		$additional_params = array(
 			array(
 				'name'  => 'order_id',
@@ -177,7 +186,7 @@ class GoPay_API {
 			),
 			array(
 				'name'  => 'gopay_plugin',
-				'value' => 'gopay-opencart',
+				'value' => 'gopay-opencart-' . $version,
 			) );
 
 		$language = 'EN';
