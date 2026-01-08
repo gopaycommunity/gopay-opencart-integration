@@ -8,7 +8,7 @@ $_['settings']           = 'Beállítások';
 
 # Info
 $_['plugin_name'] = 'OpenCart GoPay gateway';
-$_['version']     = '1.0.2';
+$_['version']     = '1.0.3';
 $_['description'] = 'OpenCart és GoPay fizetési átjáró integráció.';
 $_['author']      = 'GoPay';
 

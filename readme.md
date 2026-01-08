@@ -46,6 +46,11 @@ The new release comes with the following features:
 - Updated payment logos
 - Implemented new approach for payment method translations
 
+### 1.0.3
+This version includes following minor improvements:
+- Plugin version added to the API parameters
+- Reordered GoPay credentials in settings
+
 ## Development
 
 Running project on local machine for development and testing purposes.
