@@ -51,6 +51,10 @@ This version includes following minor improvements:
 - Plugin version added to the API parameters
 - Reordered GoPay credentials in settings
 
+### 1.0.4
+New release includes following patch:
+- Updated libraries to the latest version
+
 ## Development
 
 Running project on local machine for development and testing purposes.
