@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8829252a9492f86dfda04531b71600d9",
+    "content-hash": "2965d471e3252f161539240aaa620249",
     "packages": [
         {
             "name": "gopay/payments-sdk-php",
-            "version": "1.10.3",
+            "version": "1.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gopaycommunity/gopay-php-api.git",
-                "reference": "2fa4d6223978d0d7077fe1d7dfc0561046c5684a"
+                "reference": "129291d86c4d748c71f5987e34f425bf114381aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gopaycommunity/gopay-php-api/zipball/2fa4d6223978d0d7077fe1d7dfc0561046c5684a",
-                "reference": "2fa4d6223978d0d7077fe1d7dfc0561046c5684a",
+                "url": "https://api.github.com/repos/gopaycommunity/gopay-php-api/zipball/129291d86c4d748c71f5987e34f425bf114381aa",
+                "reference": "129291d86c4d748c71f5987e34f425bf114381aa",
                 "shasum": ""
             },
             "require": {
@@ -29,7 +29,7 @@
                 "hamcrest/hamcrest-php": "*",
                 "phpspec/prophecy": "~1.0",
                 "phpspec/prophecy-phpunit": "^2.0",
-                "phpunit/phpunit": "9.3.7"
+                "phpunit/phpunit": "9.6.33"
             },
             "type": "library",
             "autoload": {
@@ -63,9 +63,9 @@
             ],
             "support": {
                 "issues": "https://github.com/gopaycommunity/gopay-php-api/issues",
-                "source": "https://github.com/gopaycommunity/gopay-php-api/tree/1.10.3"
+                "source": "https://github.com/gopaycommunity/gopay-php-api/tree/1.11.1"
             },
-            "time": "2025-06-05T07:26:24+00:00"
+            "time": "2026-04-16T11:00:16+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
