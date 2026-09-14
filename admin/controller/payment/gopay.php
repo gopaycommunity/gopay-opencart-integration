@@ -125,6 +125,9 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->load->model( 'extension/opencart_gopay/sale/gopay' );
 		$this->model_extension_opencart_gopay_sale_gopay->create_refund_table();
 
+		// Create payment cards table
+		$this->model_extension_opencart_gopay_payment_gopay->create_cards_table();
+
 		// Create event for the menu
 		$this->model_setting_event->addEvent(
 			array(
@@ -206,6 +209,9 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->load->model( 'extension/opencart_gopay/sale/gopay' );
 		$this->model_extension_opencart_gopay_sale_gopay->drop_refund_table();
 
+		// Drop payment cards table
+		$this->model_extension_opencart_gopay_payment_gopay->drop_cards_table();
+
 		// Remove events when uninstalling module
 		$this->load->model( 'setting/event' );
 		$this->model_setting_event->deleteEventByCode( 'add_gopay_to_column_left' );
@@ -280,6 +286,11 @@ class GoPay extends \Opencart\System\Engine\Controller
 	public function process_admin_options(): bool {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
+
+		// Make sure the payment cards table exists. install() only runs on a fresh
+		// installation, so stores upgrading from an older version would not have it.
+		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
+		$this->model_extension_opencart_gopay_payment_gopay->create_cards_table();
 
 		// Check payment methods and banks enabled on GoPay account.
 		if ( ! empty( $this->config->get( 'payment_gopay_goid' ) ) &&

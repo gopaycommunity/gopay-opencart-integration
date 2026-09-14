@@ -14,7 +14,7 @@ class GoPay extends \Opencart\System\Engine\Model {
                 `order_id` bigint(255) NOT NULL,
                 `transaction_id` bigint(255) NOT NULL,
                 `message` varchar(50) NOT NULL,
-                `created_at` datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `log_level` varchar(100) NOT NULL,
                 `log` JSON NOT NULL,
                 CONSTRAINT `order_transaction_state_unique` UNIQUE(`order_id`, `transaction_id`, `message`),
@@ -29,6 +29,36 @@ class GoPay extends \Opencart\System\Engine\Model {
 	 */
 	public function drop_log_table() {
 		$this->db->query( "DROP TABLE IF EXISTS `" . DB_PREFIX . "gopay_log`;");
+	}
+
+	/**
+	 * Create payment cards table
+	 *
+	 * Only the GoPay card id is stored, never the card token,
+	 * the card number or its expiration.
+	 *
+	 * @since  1.0.5
+	 */
+	public function create_cards_table() {
+
+		$this->db->query( "CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "gopay_payment_cards` (
+                `id` bigint(255) NOT NULL AUTO_INCREMENT,
+                `customer_id` int(11) NOT NULL,
+                `card_id` varchar(50) NOT NULL,
+                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT `customer_card_unique` UNIQUE(`customer_id`, `card_id`),
+                PRIMARY KEY (`id`),
+                KEY `customer_id` (`customer_id`)
+                ) DEFAULT CHARSET=utf8;" );
+	}
+
+	/**
+	 * drop payment cards table
+	 *
+	 * @since  1.0.5
+	 */
+	public function drop_cards_table() {
+		$this->db->query( "DROP TABLE IF EXISTS `" . DB_PREFIX . "gopay_payment_cards`;");
 	}
 
 	/**
