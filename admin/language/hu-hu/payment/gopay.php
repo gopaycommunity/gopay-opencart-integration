@@ -23,6 +23,7 @@ $_['gopay_simplified_bank']           = 'Bank kiválasztása';
 $_['gopay_payment_methods']           = 'A GoPay fizetési módok engedélyezése';
 $_['gopay_banks']                     = 'Bankok engedélyezése';
 $_['gopay_payment_retry']             = 'Fizetési mód megismétlése';
+$_['gopay_card_token']                = 'Fizetés mentett kártyával';
 
 # GoPay plugin config placeholder
 $_['gopay_title_placeholder']         = 'Fizetési cím beillesztése...';
@@ -47,6 +48,8 @@ $_['gopay_simplified_bank_tooltip']   = 'Ha engedélyezve van, az ügyfelek nem 
 $_['gopay_payment_methods_tooltip']   = 'Csak a kiválasztott fizetési módok engedélyezése a GoPay fizetési átjárón.';
 $_['gopay_banks_tooltip']             = 'Csak a kiválasztott bankok engedélyezése a GoPay fizetési átjárón.';
 $_['gopay_payment_retry_tooltip']     = 'Ha engedélyezve van, a sikertelen fizetés megismétlése ugyanazzal a fizetési móddal történik, amelyet az ügyfél a megrendelés leadásakor kiválasztott.';
+$_['gopay_card_token_tooltip']        = 'Amikor az ügyfél bankkártyával fizet, felajánlhatja neki a kártya mentését. Ebben az esetben létrejön egy kártyatoken, amely a jövőbeli fizetésekhez használható. Ha ezt használja, az ügyfélnek nem kell újra kézzel megadnia a kártyaadatokat.';
+$_['gopay_card_token_warning']        = 'Ezt az opciót csak akkor engedélyezze, ha a kártyamentés / tokenizáció aktív az Ön GoPay kereskedői fiókjához. Ha a fiókja nem támogatja ezt a funkciót, a fizetési folyamat meghiúsulhat, és a fizetések elérhetetlenné válhatnak.';
 
 # Error
 $_['error_permission']                = 'Engedélyre van szüksége a fizetés módosításához GoPay!';

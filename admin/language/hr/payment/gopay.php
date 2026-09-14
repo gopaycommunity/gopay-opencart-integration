@@ -23,6 +23,7 @@ $_['gopay_simplified_bank']           = 'Odabir banke';
 $_['gopay_payment_methods']           = 'Omogućite GoPay načine plaćanja';
 $_['gopay_banks']                     = 'Omogućite banke';
 $_['gopay_payment_retry']             = 'Ponovi metodu plaćanja';
+$_['gopay_card_token']                = 'Plaćanje spremljenom karticom';
 
 # GoPay plugin config placeholder
 $_['gopay_title_placeholder']         = 'Umetni naslov plaćanja...';
@@ -47,6 +48,8 @@ $_['gopay_simplified_bank_tooltip']   = 'Ako je omogućeno, klijenti ne mogu bir
 $_['gopay_payment_methods_tooltip']   = 'Omogućite samo odabrane načine plaćanja na GoPay pristupniku za plaćanje.';
 $_['gopay_banks_tooltip']             = 'Omogućite samo odabrane banke na GoPay pristupniku za plaćanje.';
 $_['gopay_payment_retry_tooltip']     = 'Ako je omogućeno, ponovni pokušaj plaćanja neuspjelog plaćanja izvršit će se istim načinom plaćanja koji je odabran kada je kupac slao narudžbu.';
+$_['gopay_card_token_tooltip']        = 'Kada korisnik plaća karticom, možete mu ponuditi spremanje kartice. U tom slučaju generirat će se token kartice koji se može koristiti za buduća plaćanja. Ako se koristi, korisnik neće morati ponovno ručno unositi podatke o kartici.';
+$_['gopay_card_token_warning']        = 'Omogućite ovu opciju samo ako je spremanje kartice / tokenizacija aktivna za vaš GoPay trgovački račun. Ako vaš račun ne podržava ovu funkciju, proces naplate može ne uspjeti, a plaćanja mogu postati nedostupna.';
 
 # Error
 $_['error_permission']                = 'Trebate dopuštenje za izmjenu plaćanja GoPay!';

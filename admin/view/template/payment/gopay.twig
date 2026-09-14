@@ -215,6 +215,17 @@
                                 <p>{{ gopay_payment_retry_tooltip }}</p>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <label for="input-card_token" class="col-sm-2 col-form-label">{{ gopay_card_token }}</label>
+                            <div class="col-sm-10">
+                                <div class="form-check form-switch form-switch-lg">
+                                    <input type="hidden" name="payment_gopay_card_token" value="0"/>
+                                    <input type="checkbox" name="payment_gopay_card_token" value="1" id="input-card_token" class="form-check-input"{% if payment_gopay_card_token %} checked{% endif %}/>
+                                </div>
+                                <p>{{ gopay_card_token_tooltip }}</p>
+                                <div class="alert alert-warning mb-0"><i class="fa-solid fa-triangle-exclamation"></i> {{ gopay_card_token_warning }}</div>
+                            </div>
+                        </div>
                     {% endif %}
                 </form>
             </div>

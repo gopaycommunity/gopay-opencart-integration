@@ -9,6 +9,7 @@ $_['text_success']                    = 'Das GoPay-Zahlungsmodul wurde erfolgrei
 
 # GoPay plugin config entry
 $_['gopay_enable_disable']            = 'Aktivieren/Deaktivieren';
+$_['gopay_inline']                    = 'Inline-Zahlungsgateway';
 $_['gopay_title']                     = 'Titel';
 $_['gopay_description']               = 'Beschreibung';
 $_['gopay_goid']                      = 'GoID';
@@ -22,6 +23,7 @@ $_['gopay_simplified_bank']           = 'Auswahl der Bank';
 $_['gopay_payment_methods']           = 'GoPay-Zahlungsmethoden aktivieren';
 $_['gopay_banks']                     = 'Banken freischalten';
 $_['gopay_payment_retry']             = 'Wiederholung der Zahlungsmethode';
+$_['gopay_card_token']                = 'Mit gespeicherter Karte bezahlen';
 
 # GoPay plugin config placeholder
 $_['gopay_title_placeholder']         = 'Zahlungstitel einfügen...';
@@ -32,6 +34,7 @@ $_['gopay_client_secret_placeholder'] = 'Geben Sie Ihr GoPay Client Secret Token
 
 # GoPay plugin config tooltip
 $_['gopay_enable_disable_tooltip']    = 'GoPay-Zahlungsgateway aktivieren.';
+$_['gopay_inline_tooltip']            = 'Das Inline-Zahlungsgateway wird direkt über dem Verkaufsort initiiert.';
 $_['gopay_title_tooltip']             = 'Name der Zahlungsmethode, die an der Kasse angezeigt wird.';
 $_['gopay_description_tooltip']       = 'Beschreibung der Zahlungsmethode, die an der Kasse angezeigt wird.';
 $_['gopay_goid_tooltip']              = 'Geben Sie Ihre eindeutige GoID ein, die Sie in den Einstellungen Ihres GoPay-Kontos finden.<a href="https://help.gopay.com/en/knowledge-base/gopay-account/gopay-business-account/signing-in-password-reset-activating-and-deactivating-the-payment-gateway/how-to-activate-the-payment-gateway"> Weitere Informationen</a>.';
@@ -45,6 +48,8 @@ $_['gopay_simplified_bank_tooltip']   = 'Wenn diese Option aktiviert ist, könne
 $_['gopay_payment_methods_tooltip']   = 'Aktivieren Sie nur die ausgewählten Zahlungsmethoden auf dem GoPay-Zahlungsgateway.';
 $_['gopay_banks_tooltip']             = 'Aktivieren Sie nur die ausgewählten Banken auf dem GoPay-Zahlungsgateway.';
 $_['gopay_payment_retry_tooltip']     = 'Wenn diese Option aktiviert ist, wird die Wiederholung einer fehlgeschlagenen Zahlung mit der gleichen Zahlungsmethode durchgeführt, die der Kunde bei der Bestellung ausgewählt hat.';
+$_['gopay_card_token_tooltip']        = 'Wenn ein Kunde mit Karte bezahlt, können Sie anbieten, die Karte zu speichern. In diesem Fall wird ein Kartentoken generiert, das für zukünftige Zahlungen verwendet werden kann. Wenn es verwendet wird, muss der Kunde die Kartendaten nicht erneut manuell eingeben.';
+$_['gopay_card_token_warning']        = 'Aktivieren Sie diese Option nur, wenn das Speichern von Karten / die Tokenisierung für Ihr GoPay-Händlerkonto aktiv ist. Wenn Ihr Konto diese Funktion nicht unterstützt, kann der Bezahlvorgang fehlschlagen und Zahlungen können nicht verfügbar sein.';
 
 # Error
 $_['error_permission']                = 'Sie benötigen eine Erlaubnis zum Ändern der Zahlung GoPay!';

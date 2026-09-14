@@ -23,6 +23,7 @@ $_['gopay_simplified_bank']           = 'Selecția băncii';
 $_['gopay_payment_methods']           = 'Activați metodele de plată GoPay';
 $_['gopay_banks']                     = 'Activarea băncilor';
 $_['gopay_payment_retry']             = 'Reîncercați metoda de plată';
+$_['gopay_card_token']                = 'Plată cu card salvat';
 
 # GoPay plugin config placeholder
 $_['gopay_title_placeholder']         = 'Introduceți titlul plății...';
@@ -47,6 +48,8 @@ $_['gopay_simplified_bank_tooltip']   = 'Dacă este activată, clienții nu pot 
 $_['gopay_payment_methods_tooltip']   = 'Activați numai metodele de plată selectate pe gateway-ul de plată GoPay.';
 $_['gopay_banks_tooltip']             = 'Activați doar băncile selectate pe gateway-ul de plată GoPay.';
 $_['gopay_payment_retry_tooltip']     = 'Dacă este activată, reluarea unei plăți eșuate se va face utilizând aceeași metodă de plată care a fost selectată atunci când clientul a plasat o comandă.';
+$_['gopay_card_token_tooltip']        = 'Atunci când clientul plătește cu cardul, îi puteți oferi opțiunea de a salva cardul. În acest caz, va fi generat un token al cardului, care poate fi utilizat pentru plăți viitoare. Dacă este utilizat, clientul nu va mai trebui să introducă din nou manual datele cardului.';
+$_['gopay_card_token_warning']        = 'Activați această opțiune numai dacă salvarea cardului / tokenizarea este activă pentru contul dumneavoastră de comerciant GoPay. Dacă contul dumneavoastră nu acceptă această funcție, procesul de plată poate eșua, iar plățile pot deveni indisponibile.';
 
 # Error
 $_['error_permission']                = 'Aveți nevoie de permisiunea de a modifica plata GoPay!';

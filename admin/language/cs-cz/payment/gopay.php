@@ -23,6 +23,7 @@ $_['gopay_simplified_bank']           = 'Výběr banky';
 $_['gopay_payment_methods']           = 'Povolení platebních metod GoPay';
 $_['gopay_banks']                     = 'Povolení bank';
 $_['gopay_payment_retry']             = 'Opakování způsobu platby';
+$_['gopay_card_token']                = 'Platba uloženou kartou';
 
 # GoPay plugin config placeholder
 $_['gopay_title_placeholder']         = 'Vložte název platby...';
@@ -47,6 +48,8 @@ $_['gopay_simplified_bank_tooltip']   = 'Pokud je tato možnost povolena, zákaz
 $_['gopay_payment_methods_tooltip']   = 'Povolte pouze vybrané platební metody na platební bráně GoPay.';
 $_['gopay_banks_tooltip']             = 'V platební bráně GoPay povolte pouze vybrané banky.';
 $_['gopay_payment_retry_tooltip']     = 'Pokud je tato možnost povolena, bude opakování neúspěšné platby provedeno stejným způsobem platby, který byl zvolen při zadávání objednávky.';
+$_['gopay_card_token_tooltip']        = 'Když zákazník platí kartou, můžete požádat o uložení karty. V takovém případě se vygeneruje token karty, který můžete použít pro další platby. Pokud jej použijete, zákazník nebude muset znovu ručně zadávat údaje o kartě.';
+$_['gopay_card_token_warning']        = 'Tuto možnost povolte pouze pokud máte pro svůj obchodnický účet GoPay aktivní uložení karty / tokenizaci. Pokud váš účet tuto funkci nepodporuje, může dojít k selhání pokladny a platby nemusí být dostupné.';
 
 # Error
 $_['error_permission']                = 'K úpravě platby GoPay potřebujete oprávnění!';

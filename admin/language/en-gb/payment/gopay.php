@@ -23,6 +23,7 @@ $_['gopay_simplified_bank']           = 'Bank Selection';
 $_['gopay_payment_methods']           = 'Enable GoPay Payment Methods';
 $_['gopay_banks']                     = 'Enable Banks';
 $_['gopay_payment_retry']             = 'Retry Payment Method';
+$_['gopay_card_token']                = 'Pay with a saved card';
 
 # GoPay plugin config placeholder
 $_['gopay_title_placeholder']         = 'Insert Payment Title...';
@@ -47,6 +48,8 @@ $_['gopay_simplified_bank_tooltip']   = 'If enabled, customers cannot choose any
 $_['gopay_payment_methods_tooltip']   = 'Enable only the selected payment methods on the GoPay payment gateway.';
 $_['gopay_banks_tooltip']             = 'Enable only the selected banks on the GoPay payment gateway.';
 $_['gopay_payment_retry_tooltip']     = 'If enabled, payment retry of a failed payment will be done using the same payment method that was selected when customer was placing an order.';
+$_['gopay_card_token_tooltip']        = 'When a customer pays by card, you can offer to save the card. In that case, a card token will be generated and can be used for future payments. If used, the customer will not have to enter the card details manually again.';
+$_['gopay_card_token_warning']        = 'Enable this option only if card saving / tokenization is active for your GoPay merchant account. If your account does not support this feature, checkout may fail and payments may become unavailable.';
 
 # Error
 $_['error_permission']                = 'You need permission to modify payment GoPay!';
