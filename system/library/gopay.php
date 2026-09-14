@@ -617,4 +617,123 @@ class GoPay_API {
 
 		return $response;
 	}
+
+	/**
+	 * Get details of the payment cards saved by the customer
+	 *
+	 * Resolves the stored GoPay card ids into displayable card details.
+	 * The card token itself is never part of the returned data.
+	 *
+	 * @param int    $customer_id customer id.
+	 * @param object $controller  GoPay payment controller.
+	 *
+	 * @return array `cards` with the card details, `error` true when at least one
+	 *               card could not be loaded from GoPay
+	 * @since  1.0.5
+	 */
+	public static function get_card_details( int $customer_id, $controller ): array {
+
+		$result = array(
+			'cards' => array(),
+			'error' => false,
+		);
+
+		if ( !$customer_id ) {
+			return $result;
+		}
+
+		$controller->load->model( 'setting/setting' );
+		$controller->load->model( 'extension/opencart_gopay/payment/gopay' );
+
+		$cards = $controller->model_extension_opencart_gopay_payment_gopay->get_saved_cards( $customer_id );
+
+		if ( !$cards ) {
+			return $result;
+		}
+
+		$options = $controller->model_setting_setting->getSetting( 'payment_gopay' );
+
+		try {
+			$gopay = self::auth_gopay( $options );
+		} catch ( \Exception $e ) {
+			$result['error'] = true;
+
+			return $result;
+		}
+
+		foreach ( $cards as $card ) {
+			try {
+				$response = $gopay->getCardDetails( $card['card_id'] );
+			} catch ( \Exception $e ) {
+				$result['error'] = true;
+
+				continue;
+			}
+
+			if ( !isset( $response->statusCode ) || 200 != $response->statusCode ) {
+				$result['error'] = true;
+
+				continue;
+			}
+
+			$json = is_array( $response->json ) ? $response->json : array();
+
+			$result['cards'][] = array(
+				'id'              => $card['id'],
+				'card_id'         => $card['card_id'],
+				'status'          => $json['status'] ?? 'ACTIVE',
+				'real_masked_pan' => $json['real_masked_pan'] ?? '',
+				'card_brand'      => $json['card_brand'] ?? '',
+				'card_expiration' => str_replace( ' ', '', $json['card_expiration'] ?? '' ),
+				'card_art_url'    => $json['card_art_url'] ?? '',
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Delete a payment card on GoPay
+	 *
+	 * @param string $card_id    GoPay card id.
+	 * @param object $controller GoPay payment controller.
+	 *
+	 * @return array `deleted` whether the card is gone on GoPay, `error` the
+	 *               message from GoPay, empty when GoPay gave no reason
+	 * @since  1.0.5
+	 */
+	public static function delete_payment_card( string $card_id, $controller ): array {
+
+		$result = array(
+			'deleted' => false,
+			'error'   => '',
+		);
+
+		if ( $card_id === '' ) {
+			return $result;
+		}
+
+		$controller->load->model( 'setting/setting' );
+		$options = $controller->model_setting_setting->getSetting( 'payment_gopay' );
+
+		try {
+			$gopay    = self::auth_gopay( $options );
+			$response = $gopay->deleteCard( $card_id );
+		} catch ( \Exception $e ) {
+			return $result;
+		}
+
+		$status_code = $response->statusCode ?? 0;
+
+		if ( 2 == floor( $status_code / 100 ) || 404 == $status_code ) {
+			$result['deleted'] = true;
+
+			return $result;
+		}
+
+		$json            = is_array( $response->json ) ? $response->json : array();
+		$result['error'] = (string)( $json['errors'][0]['message'] ?? '' );
+
+		return $result;
+	}
 }

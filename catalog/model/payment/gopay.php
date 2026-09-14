@@ -133,4 +133,80 @@ class GoPay extends \Opencart\System\Engine\Model {
 
 		return true;
 	}
+
+	/**
+	 * Store a GoPay card id for the customer
+	 *
+	 * Only the GoPay card id is stored, never the card token or the card details.
+	 * The insert is idempotent, the same payment notification can be delivered
+	 * more than once.
+	 *
+	 * @param int    $customer_id customer id.
+	 * @param string $card_id     GoPay card id.
+	 *
+	 * @since  1.0.5
+	 */
+	public function insert_saved_card( int $customer_id, string $card_id ): void {
+
+		if ( !$customer_id || $card_id === '' ) {
+			return;
+		}
+
+		$this->db->query( "INSERT INTO `" . DB_PREFIX . "gopay_payment_cards` SET `customer_id` = '" .
+			(int)$customer_id . "', `card_id` = '" . $this->db->escape( $card_id ) .
+			"', `created_at` = NOW() ON DUPLICATE KEY UPDATE `card_id` = `card_id`" );
+	}
+
+	/**
+	 * Get the card ids saved by the customer, newest first
+	 *
+	 * @param int $customer_id customer id.
+	 *
+	 * @return array
+	 * @since  1.0.5
+	 */
+	public function get_saved_cards( int $customer_id ): array {
+
+		if ( !$customer_id ) {
+			return array();
+		}
+
+		return $this->db->query( "SELECT `id`, `card_id`, `created_at` FROM `" . DB_PREFIX .
+			"gopay_payment_cards` WHERE `customer_id` = '" . (int)$customer_id .
+			"' ORDER BY `created_at` DESC, `id` DESC" )->rows;
+	}
+
+	/**
+	 * Remove a saved card id of the customer
+	 *
+	 * The card id is always matched together with the customer id, so a customer
+	 * can never remove a card that belongs to somebody else.
+	 *
+	 * @param int    $customer_id customer id.
+	 * @param string $card_id     GoPay card id.
+	 *
+	 * @return bool whether a card was removed
+	 * @since  1.0.5
+	 */
+	public function delete_customer_card( int $customer_id, string $card_id ): bool {
+
+		if ( !$customer_id || $card_id === '' ) {
+			return false;
+		}
+
+		$card_id = $this->db->escape( $card_id );
+
+		$card = $this->db->query( "SELECT `id` FROM `" . DB_PREFIX .
+			"gopay_payment_cards` WHERE `customer_id` = '" . (int)$customer_id .
+			"' AND `card_id` = '" . $card_id . "'" )->row;
+
+		if ( !$card ) {
+			return false;
+		}
+
+		$this->db->query( "DELETE FROM `" . DB_PREFIX . "gopay_payment_cards` WHERE `customer_id` = '" .
+			(int)$customer_id . "' AND `card_id` = '" . $card_id . "'" );
+
+		return true;
+	}
 }
