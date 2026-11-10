@@ -48,7 +48,7 @@ $_['gopay_simplified_bank_tooltip']   = 'Jeśli funkcja ta jest włączona, klie
 $_['gopay_payment_methods_tooltip']   = 'Włącz tylko wybrane metody płatności na bramie płatności GoPay.';
 $_['gopay_banks_tooltip']             = 'Włącz tylko wybrane banki w bramie płatności GoPay.';
 $_['gopay_payment_retry_tooltip']     = 'Jeśli opcja ta jest włączona, ponowna próba dokonania nieudanej płatności zostanie wykonana przy użyciu tej samej metody płatności, która została wybrana podczas składania zamówienia przez klienta.';
-$_['gopay_card_token_tooltip']        = 'Gdy klient płaci kartą, možesz zaoferować zapisanie karty. W takim przypadku zostanie wygenerowany token karty, który možna wykorzystać do przyszłych płatności. Jeśli zostanie użyty, klient nie będzie musiał ponownie ręcznie wpisywać danych karty.';
+$_['gopay_card_token_tooltip']        = 'Gdy klient płaci kartą, możesz zaoferować zapisanie karty. W takim przypadku zostanie wygenerowany token karty, który można wykorzystać do przyszłych płatności. Jeśli zostanie użyty, klient nie będzie musiał ponownie ręcznie wpisywać danych karty.';
 $_['gopay_card_token_warning']        = 'Włącz tę opcję tylko wtedy, gdy zapisywanie kart / tokenizacja jest aktywna dla Twojego konta sprzedawcy GoPay. Jeśli Twoje konto nie obsługuje tej funkcji, proces płatności może się nie powieść, a płatności mogą stać się niedostępne.';
 
 # Error
