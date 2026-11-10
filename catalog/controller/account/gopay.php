@@ -54,6 +54,266 @@ class GoPay extends \Opencart\System\Engine\Controller
 	}
 
 	/**
+	 * Saved payment cards on the "Payment Methods" account page (OpenCart 4.1+)
+	 *
+	 * OpenCart calls this for every enabled payment extension and shows the
+	 * returned HTML; nothing is shown for null (also when the customer has no
+	 * saved card, OpenCart then shows its own "no results" text).
+	 *
+	 * @return string|null
+	 * @since  1.0.5
+	 */
+	public function index(): ?string {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+
+		if ( !\GoPay_API::has_native_payment_methods_page() || !\GoPay_API::is_card_token_enabled( $this ) ||
+			!$this->customer->isLogged() ) {
+			return null;
+		}
+
+		$result = \GoPay_API::get_card_details( (int)$this->customer->getId(), $this );
+		$cards  = $this->displayed_cards( $result['cards'] );
+
+		if ( !$cards && !$result['error'] ) {
+			return null;
+		}
+
+		return $this->cards_list( $cards, $result['error'], true );
+	}
+
+	/**
+	 * Saved payment cards page (OpenCart 4.0.2.x)
+	 *
+	 * OpenCart 4.0.2.x has no usable "Payment Methods" page, so the cards get
+	 * a page of their own, linked from the account page (account_link()).
+	 *
+	 * @since  1.0.5
+	 */
+	public function cards(): void {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+
+		$language = $this->config->get( 'config_language' );
+		$token    = $this->session->data['customer_token'] ?? '';
+
+		if ( !\GoPay_API::is_card_token_enabled( $this ) ) {
+			$this->response->redirect( $this->url->link( 'account/account', 'language=' . $language .
+				( $token ? '&customer_token=' . $token : '' ) ) );
+		}
+
+		// One place for the cards - the native page on OpenCart 4.1+.
+		if ( \GoPay_API::has_native_payment_methods_page() ) {
+			$this->response->redirect( $this->url->link( 'account/payment_method', 'language=' . $language .
+				( $token ? '&customer_token=' . $token : '' ) ) );
+		}
+
+		if ( !$this->is_customer_session() ) {
+			$this->session->data['redirect'] = $this->url->link( 'extension/opencart_gopay/account/gopay.cards',
+				'language=' . $language );
+
+			$this->response->redirect( $this->url->link( 'account/login', 'language=' . $language ) );
+		}
+
+		$this->load->language( 'account/account' );
+		$this->load->language( 'extension/opencart_gopay/account/gopay' );
+
+		$this->document->setTitle( $this->language->get( 'gopay_heading_cards' ) );
+
+		$data['breadcrumbs']   = array();
+		$data['breadcrumbs'][] = array(
+			'text' => $this->language->get( 'text_home' ),
+			'href' => $this->url->link( 'common/home', 'language=' . $language ),
+		);
+		$data['breadcrumbs'][] = array(
+			'text' => $this->language->get( 'text_account' ),
+			'href' => $this->url->link( 'account/account', 'language=' . $language . '&customer_token=' . $token ),
+		);
+		$data['breadcrumbs'][] = array(
+			'text' => $this->language->get( 'gopay_heading_cards' ),
+			'href' => $this->url->link( 'extension/opencart_gopay/account/gopay.cards', 'language=' . $language .
+				'&customer_token=' . $token ),
+		);
+
+		$result = \GoPay_API::get_card_details( (int)$this->customer->getId(), $this );
+
+		$data['list'] = $this->cards_list( $this->displayed_cards( $result['cards'] ), $result['error'], false );
+		$data['back'] = $this->url->link( 'account/account', 'language=' . $language . '&customer_token=' . $token );
+
+		$data['column_left']    = $this->load->controller( 'common/column_left' );
+		$data['column_right']   = $this->load->controller( 'common/column_right' );
+		$data['content_top']    = $this->load->controller( 'common/content_top' );
+		$data['content_bottom'] = $this->load->controller( 'common/content_bottom' );
+		$data['footer']         = $this->load->controller( 'common/footer' );
+		$data['header']         = $this->load->controller( 'common/header' );
+
+		$this->response->setOutput( $this->load->view( 'extension/opencart_gopay/account/gopay_cards', $data ) );
+	}
+
+	/**
+	 * Add the "Payment cards" link to the account page (OpenCart 4.0.2.x)
+	 *
+	 * Event handler for catalog/controller/account/account/after. The account
+	 * page has its links hard coded, so the link is inserted after the address
+	 * book link of the rendered page - only in the main content, not in the
+	 * Account module of a side column. Nothing changes when the link is not found
+	 * (custom theme).
+	 *
+	 * @param string $route  route of the controller.
+	 * @param array  $args   arguments of the controller.
+	 * @param mixed  $output output of the controller.
+	 *
+	 * @since  1.0.5
+	 */
+	public function account_link( &$route, &$args, &$output ): void {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+
+		if ( \GoPay_API::has_native_payment_methods_page() || !\GoPay_API::is_card_token_enabled( $this ) ||
+			!$this->is_customer_session() ) {
+			return;
+		}
+
+		$this->load->language( 'extension/opencart_gopay/account/gopay' );
+
+		$query  = 'language=' . $this->config->get( 'config_language' ) . '&customer_token=' . $this->session->data['customer_token'];
+		$anchor = '<a href="' . $this->url->link( 'account/address', $query ) . '"';
+		$html   = $this->response->getOutput();
+
+		$content  = strpos( $html, 'id="content"' );
+		$position = strpos( $html, $anchor, $content === false ? 0 : $content );
+		$end      = $position === false ? false : strpos( $html, '</li>', $position );
+
+		if ( $end === false ) {
+			return;
+		}
+
+		$link = '<li><a href="' . $this->url->link( 'extension/opencart_gopay/account/gopay.cards', $query ) . '">' .
+			htmlspecialchars( $this->language->get( 'gopay_text_account_link' ), ENT_QUOTES, 'UTF-8' ) . '</a></li>';
+
+		$this->response->setOutput( substr_replace( $html, $link, $end + strlen( '</li>' ), 0 ) );
+	}
+
+	/**
+	 * Delete a saved payment card (AJAX, JSON)
+	 *
+	 * The card is deleted on GoPay first, then locally. Only a card saved for
+	 * the logged in customer can be deleted - the ownership is checked before
+	 * GoPay is called.
+	 *
+	 * @since  1.0.5
+	 */
+	public function delete_card(): void {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+
+		$this->load->language( 'extension/opencart_gopay/account/gopay' );
+
+		$language = $this->config->get( 'config_language' );
+		$json     = array( 'success' => false );
+
+		if ( !\GoPay_API::is_card_token_enabled( $this ) ) {
+			$json['redirect'] = $this->url->link( 'account/account', 'language=' . $language, true );
+		} elseif ( !$this->is_customer_session() ) {
+			// Back to the cards after the login.
+			$this->session->data['redirect'] = $this->url->link( \GoPay_API::has_native_payment_methods_page() ?
+				'account/payment_method' : 'extension/opencart_gopay/account/gopay.cards', 'language=' . $language );
+
+			$json['redirect'] = $this->url->link( 'account/login', 'language=' . $language, true );
+		} else {
+			$customer_id = (int)$this->customer->getId();
+			$card_id     = trim( (string)( $this->request->post['card_id'] ?? '' ) );
+
+			$this->load->model( 'extension/opencart_gopay/payment/gopay' );
+
+			if ( !$this->model_extension_opencart_gopay_payment_gopay->has_saved_card( $customer_id, $card_id ) ) {
+				$json['message'] = $this->language->get( 'gopay_error_card_delete' );
+			} else {
+				$result = \GoPay_API::delete_payment_card( $card_id, $this );
+
+				if ( !$result['deleted'] ) {
+					// The reason from GoPay as it came, otherwise a generic message.
+					$json['message'] = $result['error'] !== '' ? $result['error'] :
+						$this->language->get( 'gopay_error_card_delete' );
+				} else {
+					try {
+						$removed = $this->model_extension_opencart_gopay_payment_gopay->delete_customer_card( $customer_id, $card_id );
+					} catch ( \Exception $e ) {
+						$removed = false;
+					}
+
+					if ( $removed ) {
+						$json['success'] = true;
+						$json['card_id'] = $card_id;
+					} else {
+						$json['message'] = $this->language->get( 'gopay_error_card_delete' );
+					}
+				}
+			}
+		}
+
+		$this->response->addHeader( 'Content-Type: application/json' );
+		$this->response->setOutput( json_encode( $json ) );
+	}
+
+	/**
+	 * Render the saved cards list (shared by index() and cards())
+	 *
+	 * @param array $cards        cards from displayed_cards().
+	 * @param bool  $error        some cards could not be loaded from GoPay.
+	 * @param bool  $show_heading heading of the GoPay section (native page).
+	 *
+	 * @return string
+	 * @since  1.0.5
+	 */
+	private function cards_list( array $cards, bool $error, bool $show_heading ): string {
+		$this->load->language( 'extension/opencart_gopay/account/gopay' );
+
+		$data['cards']         = $cards;
+		$data['error_load']    = $error && !$cards;
+		$data['error_partial'] = $error && $cards;
+		$data['show_heading']  = $show_heading;
+		$data['delete']        = $this->url->link( 'extension/opencart_gopay/account/gopay.delete_card', 'language=' .
+			$this->config->get( 'config_language' ) . '&customer_token=' . ( $this->session->data['customer_token'] ?? '' ) );
+
+		return $this->load->view( 'extension/opencart_gopay/account/gopay_cards_list', $data );
+	}
+
+	/**
+	 * Cards shown in the account: active ones and suspended ones (those can
+	 * only be deleted), with the display flags of the template
+	 *
+	 * @param array $cards cards from GoPay_API::get_card_details().
+	 *
+	 * @return array
+	 * @since  1.0.5
+	 */
+	private function displayed_cards( array $cards ): array {
+		$displayed = array();
+
+		foreach ( $cards as $card ) {
+			if ( !in_array( $card['status'], array( 'ACTIVE', 'SUSPENDED' ), true ) ) {
+				continue;
+			}
+
+			$card['suspended'] = 'SUSPENDED' === $card['status'];
+			$card['short_pan'] = '****' . substr( $card['real_masked_pan'], -4 );
+			$displayed[]       = $card;
+		}
+
+		return $displayed;
+	}
+
+	/**
+	 * Check the logged in customer and the customer_token of the request
+	 * (account/login.validate exists only since OpenCart 4.1)
+	 *
+	 * @return bool
+	 * @since  1.0.5
+	 */
+	private function is_customer_session(): bool {
+		return $this->customer->isLogged() && isset( $this->request->get['customer_token'] ) &&
+			isset( $this->session->data['customer_token'] ) &&
+			$this->request->get['customer_token'] === $this->session->data['customer_token'];
+	}
+
+	/**
 	 * Payment fields.
 	 *
 	 * @param array $subscription list of products

@@ -164,6 +164,9 @@ class GoPay extends \Opencart\System\Engine\Controller
 			)
 		);
 
+		// Create event for the payment cards link in the customer account
+		$this->add_cards_account_event();
+
 		// Create cron for recurrent payment (subscriptions)
 		$this->load->model( 'setting/cron' );
 		$this->model_setting_cron->addCron( 'recurrent_gopay', 'GoPay recurrent payment (subscriptions)',
@@ -217,6 +220,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->model_setting_event->deleteEventByCode( 'add_gopay_to_column_left' );
 		$this->model_setting_event->deleteEventByCode( 'change_order_history_info_page' );
 		$this->model_setting_event->deleteEventByCode( 'change_sale_order_info_page' );
+		$this->model_setting_event->deleteEventByCode( 'add_gopay_cards_to_account' );
 
 		// Remove cron for recurrent payment (subscriptions)
 		$this->load->model( 'setting/cron' );
@@ -278,6 +282,30 @@ class GoPay extends \Opencart\System\Engine\Controller
 	}
 
 	/**
+	 * Register the event adding the payment cards link to the customer account
+	 *
+	 * Used on OpenCart 4.0.2.x only (the handler does nothing on 4.1+, where the
+	 * cards are on the native "Payment Methods" page); registered on every version
+	 * so it also works after upgrading OpenCart.
+	 *
+	 * @since  1.0.5
+	 */
+	private function add_cards_account_event(): void {
+		$this->load->model( 'setting/event' );
+
+		$this->model_setting_event->addEvent(
+			array(
+				'code'        => 'add_gopay_cards_to_account',
+				'description' => 'Add GoPay payment cards link to the customer account',
+				'trigger'     => 'catalog/controller/account/account/after',
+				'action'      => 'extension/opencart_gopay/account/gopay.account_link',
+				'status'      => 1,
+				'sort_order'  => 1,
+			)
+		);
+	}
+
+	/**
 	 * Process admin options.
 	 *
 	 * @return bool
@@ -291,6 +319,12 @@ class GoPay extends \Opencart\System\Engine\Controller
 		// installation, so stores upgrading from an older version would not have it.
 		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
 		$this->model_extension_opencart_gopay_payment_gopay->create_cards_table();
+
+		// The same for the payment cards account link event.
+		$this->load->model( 'setting/event' );
+		if ( !$this->model_setting_event->getEventByCode( 'add_gopay_cards_to_account' ) ) {
+			$this->add_cards_account_event();
+		}
 
 		// Check payment methods and banks enabled on GoPay account.
 		if ( ! empty( $this->config->get( 'payment_gopay_goid' ) ) &&

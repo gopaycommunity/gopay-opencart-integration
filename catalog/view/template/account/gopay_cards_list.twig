@@ -1,0 +1,301 @@
+<style>
+    .gopay-cards-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .gopay-cards-table th,
+    .gopay-cards-table td {
+        padding: 8px;
+        vertical-align: middle;
+    }
+
+    .gopay-cards-table th:nth-child(1),
+    .gopay-cards-table td:nth-child(1) {
+        width: 25%;
+    }
+
+    .gopay-cards-table th:nth-child(2),
+    .gopay-cards-table td:nth-child(2) {
+        width: 40%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .gopay-cards-table td:nth-child(2) {
+        letter-spacing: 2px;
+    }
+
+    .gopay-cards-table th:nth-child(3),
+    .gopay-cards-table td:nth-child(3) {
+        width: 15%;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .gopay-cards-table th:nth-child(4),
+    .gopay-cards-table td:nth-child(4) {
+        width: 20%;
+        text-align: right;
+    }
+
+    .gopay-card-art {
+        max-height: 64px;
+        max-width: 100%;
+        width: auto;
+        border-radius: 5px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        vertical-align: middle;
+    }
+
+    .gopay-card-art--suspended {
+        opacity: 0.45;
+        filter: grayscale(80%);
+    }
+
+    .gopay-card-row--suspended td {
+        opacity: 0.7;
+    }
+
+    .gopay-suspended-badge {
+        display: inline-block;
+        margin-top: 5px;
+        padding: 2px 7px;
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        cursor: help;
+        position: relative;
+    }
+
+    .gopay-suspended-badge::after {
+        content: attr(aria-label);
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 0;
+        width: 220px;
+        padding: 7px 10px;
+        background: #333;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: normal;
+        text-transform: none;
+        border-radius: 5px;
+        line-height: 1.4;
+        z-index: 10;
+        pointer-events: none;
+        white-space: normal;
+    }
+
+    .gopay-suspended-badge:hover::after {
+        display: block;
+    }
+
+    .gopay-delete-confirm {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    @media (max-width: 768px) {
+        .gopay-cards-table thead {
+            display: none;
+        }
+
+        .gopay-cards-table,
+        .gopay-cards-table tbody,
+        .gopay-cards-table tr {
+            display: block;
+            width: 100%;
+        }
+
+        .gopay-cards-table tr {
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .gopay-cards-table tbody td,
+        .gopay-cards-table tbody td:nth-child(n) {
+            display: block;
+            width: auto;
+            position: relative;
+            padding: 8px 12px 8px 40%;
+            border: none;
+            text-align: right;
+        }
+
+        .gopay-suspended-badge::after {
+            left: auto;
+            right: 0;
+        }
+
+        .gopay-cards-table tbody td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 12px;
+            font-weight: 600;
+            color: #666;
+            text-align: left;
+            letter-spacing: normal;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .gopay-masked-pan {
+            font-size: 0;
+            letter-spacing: 0;
+        }
+
+        .gopay-masked-pan::before {
+            content: attr(data-short);
+            font-size: 16px;
+            letter-spacing: 2px;
+        }
+    }
+</style>
+<div id="gopay-cards" data-delete="{{ delete }}">
+    {% if show_heading %}
+        <h2>GoPay — {{ gopay_heading_cards }}</h2>
+    {% endif %}
+    <div class="gopay-cards-alert"></div>
+    {% if error_load %}
+        <div class="alert alert-danger">{{ gopay_error_cards_load }}</div>
+    {% else %}
+        {% if error_partial %}
+            <div class="alert alert-warning">{{ gopay_error_cards_partial }}</div>
+        {% endif %}
+        {% if cards %}
+            <p class="gopay-cards-intro">{{ gopay_text_cards_intro }}</p>
+            <div class="gopay-cards-wrapper">
+                <table class="table gopay-cards-table">
+                    <thead>
+                        <tr>
+                            <th>{{ gopay_column_brand }}</th>
+                            <th>{{ gopay_column_card_number }}</th>
+                            <th>{{ gopay_column_expiry }}</th>
+                            <th>{{ gopay_column_action }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for card in cards %}
+                            <tr class="gopay-card-row{% if card.suspended %} gopay-card-row--suspended{% endif %}" data-card-id="{{ card.card_id|e('html_attr') }}">
+                                <td data-label="{{ gopay_column_brand|e('html_attr') }}">
+                                    {% if card.card_art_url %}
+                                        <img src="{{ card.card_art_url|e('html_attr') }}" alt="{{ card.card_brand|e('html_attr') }}" class="gopay-card-art{% if card.suspended %} gopay-card-art--suspended{% endif %}" onerror="this.nextElementSibling.classList.remove('d-none'); this.remove();"/>
+                                    {% endif %}
+                                    <span class="gopay-card-brand{% if card.card_art_url %} d-none{% endif %}">{{ card.card_brand|e }}</span>
+                                    {% if card.suspended %}
+                                        <br/><span class="gopay-suspended-badge" aria-label="{{ gopay_text_suspended_tooltip|e('html_attr') }}">{{ gopay_text_suspended }}</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="{{ gopay_column_card_number|e('html_attr') }}">
+                                    <span class="gopay-masked-pan" data-short="{{ card.short_pan|e('html_attr') }}">{{ card.real_masked_pan|e }}</span>
+                                </td>
+                                <td data-label="{{ gopay_column_expiry|e('html_attr') }}">{{ card.card_expiration|e }}</td>
+                                <td data-label="{{ gopay_column_action|e('html_attr') }}">
+                                    <div class="gopay-delete-wrapper">
+                                        <button type="button" class="btn btn-danger btn-sm gopay-delete-card">{{ gopay_button_delete }}</button>
+                                        <div class="gopay-delete-confirm d-none">
+                                            <span>{{ gopay_text_confirm_delete }}</span>
+                                            <button type="button" class="btn btn-danger btn-sm gopay-confirm-yes">{{ gopay_button_ok }}</button>
+                                            <button type="button" class="btn btn-light btn-sm gopay-confirm-cancel">{{ gopay_button_cancel }}</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="gopay-cards-empty">{{ gopay_text_no_cards }}</p>
+        {% endif %}
+    {% endif %}
+</div>
+<script type="text/javascript">
+    $(function () {
+        var root = $('#gopay-cards');
+        var messages = {
+            error: '{{ gopay_error_card_delete|e('js') }}',
+            empty: '{{ gopay_text_no_cards|e('js') }}'
+        };
+
+        var showError = function (text) {
+            var alert = $('<div class="alert alert-danger alert-dismissible"></div>').text(text)
+                .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+
+            root.find('.gopay-cards-alert').html(alert);
+        };
+
+        var resetRow = function (row) {
+            row.find('button').prop('disabled', false);
+            row.find('.gopay-delete-confirm').addClass('d-none');
+            row.find('.gopay-delete-card').removeClass('d-none');
+        };
+
+        // Bound to the list, which OpenCart may reload - handlers never pile up.
+        root.on('click', '.gopay-delete-card', function (e) {
+            e.preventDefault();
+            var wrapper = $(this).closest('.gopay-delete-wrapper');
+
+            wrapper.find('.gopay-delete-card').addClass('d-none');
+            wrapper.find('.gopay-delete-confirm').removeClass('d-none');
+        });
+
+        root.on('click', '.gopay-confirm-cancel', function (e) {
+            e.preventDefault();
+            resetRow($(this).closest('tr'));
+        });
+
+        root.on('click', '.gopay-confirm-yes', function (e) {
+            e.preventDefault();
+            var row = $(this).closest('tr');
+
+            row.find('button').prop('disabled', true);
+            root.find('.gopay-cards-alert').empty();
+
+            $.ajax({
+                url: root.attr('data-delete'),
+                type: 'post',
+                data: { card_id: row.attr('data-card-id') },
+                dataType: 'json'
+            }).done(function (json) {
+                if (json['redirect']) {
+                    location = json['redirect'];
+
+                    return;
+                }
+
+                if (json['success']) {
+                    row.fadeOut(300, function () {
+                        var table = row.closest('table');
+
+                        row.remove();
+
+                        if (!table.find('tbody tr').length) {
+                            root.find('.gopay-cards-intro').remove();
+                            table.closest('.gopay-cards-wrapper').replaceWith($('<p class="gopay-cards-empty"></p>').text(messages.empty));
+                        }
+                    });
+
+                    return;
+                }
+
+                showError(json['message'] || messages.error);
+                resetRow(row);
+            }).fail(function () {
+                showError(messages.error);
+                resetRow(row);
+            });
+        });
+    });
+</script>
