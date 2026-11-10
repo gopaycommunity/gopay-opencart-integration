@@ -105,13 +105,16 @@ class GoPay_API {
 	 * @param array    $callback             callback links.
 	 * @param float    $total                currency value.
 	 * @param array    $data                 Customer address.
+	 * @param bool     $request_card_token   ask GoPay to save the card used for the payment.
+	 * @param string   $card_id              GoPay id of a saved card to pay with.
 	 *
 	 * @return Response
 	 * @since 1.0.0
 	 */
 	public static function create_payment( ?string $gopay_payment_method, array $order,
 	                                       string $end_date, array $options, array $items,
-	                                       array $callback, float $total, array $data ) : Response {
+	                                       array $callback, float $total, array $data,
+	                                       bool $request_card_token = false, string $card_id = '' ) : Response {
 
 		$gopay = \GoPay_API::auth_gopay( $options );
 
@@ -164,6 +167,9 @@ class GoPay_API {
 				unset( $payer['allowed_swifts'] );
 				$payer['default_swift'] = $default_swift;
 			}
+
+			$payer = self::add_card_token_params( $payer, $gopay, $gopay_payment_method, $end_date, $options,
+				$request_card_token, $card_id );
 		} else {
 			$payer = array(
 				'contact' => $contact,
@@ -222,6 +228,62 @@ class GoPay_API {
 		$response = $gopay->createPayment( $data );
 
 		return self::decode_response( $response );
+	}
+
+	/**
+	 * Add the card tokenization parameters to the payer
+	 *
+	 * Either pays with a saved card (allowed_card_token) or asks GoPay to save
+	 * the card used for the payment (request_card_token). Only for a card payment
+	 * without recurrence and with tokenization enabled; a saved card that cannot
+	 * be used falls back to a regular card payment.
+	 *
+	 * @param array    $payer                payer of the payment.
+	 * @param Payments $gopay                authenticated GoPay client.
+	 * @param ?string  $gopay_payment_method payment method.
+	 * @param string   $end_date             the end date of recurrence, empty without recurrence.
+	 * @param array    $options              plugin options.
+	 * @param bool     $request_card_token   ask GoPay to save the card.
+	 * @param string   $card_id              GoPay id of a saved card to pay with.
+	 *
+	 * @return array payer
+	 * @since  1.0.5
+	 */
+	private static function add_card_token_params( array $payer, Payments $gopay, ?string $gopay_payment_method,
+	                                               string $end_date, array $options,
+	                                               bool $request_card_token, string $card_id ): array {
+
+		if ( empty( $options['payment_gopay_card_token'] ) || 'PAYMENT_CARD' !== $gopay_payment_method ||
+			$end_date !== '' ) {
+			return $payer;
+		}
+
+		// Pay with a saved card.
+		if ( $card_id !== '' && $card_id !== 'new' &&
+			in_array( 'PAYMENT_CARD', (array)( $options['payment_gopay_payment_methods'] ?? array() ), true ) ) {
+			try {
+				$response = $gopay->getCardDetails( $card_id );
+			} catch ( \Exception $e ) {
+				$response = null;
+			}
+
+			$json = $response && 200 == $response->statusCode && is_array( $response->json ) ?
+				$response->json : array();
+
+			if ( ( $json['status'] ?? '' ) === 'ACTIVE' && !empty( $json['card_token'] ) ) {
+				$payer['allowed_payment_instruments'] = array( 'PAYMENT_CARD' );
+				$payer['allowed_card_token']          = $json['card_token'];
+
+				return $payer;
+			}
+		}
+
+		// Save the card used for the payment.
+		if ( $request_card_token ) {
+			$payer['request_card_token'] = true;
+		}
+
+		return $payer;
 	}
 
 	/**
@@ -424,6 +486,9 @@ class GoPay_API {
 		switch ( $response->json['state'] ) {
 			case 'PAID':
 			case 'AUTHORIZED':
+				// Before the redirect below, which ends the request.
+				self::save_payment_card( $response, (int)$order_id, $subscription, $controller );
+
 				$products     = $controller->db->query( "SELECT * FROM `" . DB_PREFIX .
 					"order_product` WHERE `order_id` = '" . (int)$order_id . "'" );
 
@@ -549,6 +614,51 @@ class GoPay_API {
 	}
 
 	/**
+	 * Save the card tokenized by a paid payment for the customer of the order
+	 *
+	 * The order id comes from the return/notification URL, so the card is saved
+	 * only when the GoPay payment belongs to that order. The customer is taken
+	 * from the order, the notification has no customer session. Failures are
+	 * ignored, they must not stop processing of the payment.
+	 *
+	 * @param Response $response     GoPay payment status.
+	 * @param int      $order_id     order id.
+	 * @param array    $subscription subscription of the order, empty without one.
+	 * @param object   $controller   GoPay payment controller.
+	 *
+	 * @since  1.0.5
+	 */
+	private static function save_payment_card( Response $response, int $order_id, array $subscription, $controller ): void {
+
+		$card_id = (string)( $response->json['payer']['card_id'] ?? '' );
+
+		if ( $card_id === '' || $subscription ||
+			(string)( $response->json['order_number'] ?? '' ) !== (string)$order_id ) {
+			return;
+		}
+
+		try {
+			$order       = $controller->model_checkout_order->getOrder( $order_id );
+			$customer_id = (int)( $order['customer_id'] ?? 0 );
+
+			if ( !$customer_id ) {
+				return;
+			}
+
+			$controller->load->model( 'extension/opencart_gopay/payment/gopay' );
+
+			// On the first payment the subscription record does not exist yet.
+			if ( $controller->model_extension_opencart_gopay_payment_gopay->has_order_subscription( $order_id ) ) {
+				return;
+			}
+
+			$controller->model_extension_opencart_gopay_payment_gopay->insert_saved_card( $customer_id, $card_id );
+		} catch ( \Exception $e ) {
+			return;
+		}
+	}
+
+	/**
 	 * GoPay create recurrence
 	 *
 	 * @param int|string $amount amount of the recurrence.
@@ -622,10 +732,13 @@ class GoPay_API {
 	 * Get details of the payment cards saved by the customer
 	 *
 	 * Resolves the stored GoPay card ids into displayable card details.
-	 * The card token itself is never part of the returned data.
+	 * The card token itself is never part of the returned data. Cards deleted
+	 * on GoPay or unknown to GoPay are removed from the customer's saved cards.
+	 * All other cards are returned with their status (ACTIVE, SUSPENDED, ...),
+	 * which cards to show is up to the caller.
 	 *
 	 * @param int    $customer_id customer id.
-	 * @param object $controller  GoPay payment controller.
+	 * @param object $controller  calling catalog controller (checkout or account).
 	 *
 	 * @return array `cards` with the card details, `error` true when at least one
 	 *               card could not be loaded from GoPay
@@ -653,6 +766,12 @@ class GoPay_API {
 
 		$options = $controller->model_setting_setting->getSetting( 'payment_gopay' );
 
+		if ( !self::has_credentials( $options ) ) {
+			$result['error'] = true;
+
+			return $result;
+		}
+
 		try {
 			$gopay = self::auth_gopay( $options );
 		} catch ( \Exception $e ) {
@@ -670,22 +789,36 @@ class GoPay_API {
 				continue;
 			}
 
-			if ( !isset( $response->statusCode ) || 200 != $response->statusCode ) {
+			$status_code = $response->statusCode ?? 0;
+			$json        = is_array( $response->json ) ? $response->json : array();
+
+			// A card deleted on GoPay, or one GoPay does not know (404, e.g. after
+			// switching from sandbox to production), is gone - forget it locally.
+			if ( 404 == $status_code || ( 200 == $status_code && ( $json['status'] ?? '' ) === 'DELETED' ) ) {
+				try {
+					$controller->model_extension_opencart_gopay_payment_gopay->delete_customer_card(
+						$customer_id, $card['card_id'] );
+				} catch ( \Exception $e ) {
+					// Retried on the next load.
+				}
+
+				continue;
+			}
+
+			if ( 200 != $status_code ) {
 				$result['error'] = true;
 
 				continue;
 			}
 
-			$json = is_array( $response->json ) ? $response->json : array();
-
+			// A card without a status is never treated as usable.
 			$result['cards'][] = array(
-				'id'              => $card['id'],
 				'card_id'         => $card['card_id'],
-				'status'          => $json['status'] ?? 'ACTIVE',
-				'real_masked_pan' => $json['real_masked_pan'] ?? '',
-				'card_brand'      => $json['card_brand'] ?? '',
-				'card_expiration' => str_replace( ' ', '', $json['card_expiration'] ?? '' ),
-				'card_art_url'    => $json['card_art_url'] ?? '',
+				'status'          => (string)( $json['status'] ?? '' ),
+				'real_masked_pan' => (string)( $json['real_masked_pan'] ?? '' ),
+				'card_brand'      => (string)( $json['card_brand'] ?? '' ),
+				'card_expiration' => str_replace( ' ', '', (string)( $json['card_expiration'] ?? '' ) ),
+				'card_art_url'    => (string)( $json['card_art_url'] ?? '' ),
 			);
 		}
 
@@ -696,7 +829,7 @@ class GoPay_API {
 	 * Delete a payment card on GoPay
 	 *
 	 * @param string $card_id    GoPay card id.
-	 * @param object $controller GoPay payment controller.
+	 * @param object $controller calling catalog controller (account).
 	 *
 	 * @return array `deleted` whether the card is gone on GoPay, `error` the
 	 *               message from GoPay, empty when GoPay gave no reason
@@ -715,6 +848,10 @@ class GoPay_API {
 
 		$controller->load->model( 'setting/setting' );
 		$options = $controller->model_setting_setting->getSetting( 'payment_gopay' );
+
+		if ( !self::has_credentials( $options ) ) {
+			return $result;
+		}
 
 		try {
 			$gopay    = self::auth_gopay( $options );
@@ -735,5 +872,54 @@ class GoPay_API {
 		$result['error'] = (string)( $json['errors'][0]['message'] ?? '' );
 
 		return $result;
+	}
+
+	/**
+	 * Check that saved payment cards are enabled in the store
+	 *
+	 * GoPay is enabled and card tokenization is switched on. The one condition
+	 * for every storefront part of the feature (checkout, payment, account).
+	 *
+	 * @param object $controller calling catalog controller.
+	 *
+	 * @return bool
+	 * @since  1.0.5
+	 */
+	public static function is_card_token_enabled( $controller ): bool {
+		$controller->load->model( 'setting/setting' );
+
+		return (bool)$controller->model_setting_setting->getValue( 'payment_gopay_status' ) &&
+			(bool)$controller->model_setting_setting->getValue( 'payment_gopay_card_token' );
+	}
+
+	/**
+	 * Check whether OpenCart has the native "Payment Methods" account page
+	 *
+	 * Since 4.1.0.0 the page asks every payment extension for its content
+	 * (extension/<extension>/account/<code>), so the saved cards are listed
+	 * there. 4.0.2.x has no such page and gets a page of its own.
+	 *
+	 * @return bool
+	 * @since  1.0.5
+	 */
+	public static function has_native_payment_methods_page(): bool {
+		return version_compare( VERSION, '4.1.0.0', '>=' );
+	}
+
+	/**
+	 * Check that the GoPay credentials are configured
+	 *
+	 * auth_gopay() reads them without checking, so the card methods, which
+	 * run on storefront pages, verify them first instead of raising warnings.
+	 *
+	 * @param array $options plugin options.
+	 *
+	 * @return bool
+	 * @since  1.0.5
+	 */
+	private static function has_credentials( array $options ): bool {
+		return !empty( $options['payment_gopay_goid'] ) &&
+			!empty( $options['payment_gopay_client_id'] ) &&
+			!empty( $options['payment_gopay_client_secret'] );
 	}
 }

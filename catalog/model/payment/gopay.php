@@ -162,7 +162,7 @@ class GoPay extends \Opencart\System\Engine\Model {
 	 *
 	 * @param int $customer_id customer id.
 	 *
-	 * @return array
+	 * @return array rows with `card_id`
 	 * @since  1.0.5
 	 */
 	public function get_saved_cards( int $customer_id ): array {
@@ -171,9 +171,53 @@ class GoPay extends \Opencart\System\Engine\Model {
 			return array();
 		}
 
-		return $this->db->query( "SELECT `id`, `card_id`, `created_at` FROM `" . DB_PREFIX .
+		return $this->db->query( "SELECT `card_id` FROM `" . DB_PREFIX .
 			"gopay_payment_cards` WHERE `customer_id` = '" . (int)$customer_id .
 			"' ORDER BY `created_at` DESC, `id` DESC" )->rows;
+	}
+
+	/**
+	 * Check that the card id is saved for the customer
+	 *
+	 * Used to verify card ownership before a card id coming from the request
+	 * is used for a payment or deleted.
+	 *
+	 * @param int    $customer_id customer id.
+	 * @param string $card_id     GoPay card id.
+	 *
+	 * @return bool
+	 * @since  1.0.5
+	 */
+	public function has_saved_card( int $customer_id, string $card_id ): bool {
+
+		if ( !$customer_id || $card_id === '' ) {
+			return false;
+		}
+
+		return $this->db->query( "SELECT 1 FROM `" . DB_PREFIX . "gopay_payment_cards` WHERE `customer_id` = '" .
+			(int)$customer_id . "' AND `card_id` = '" . $this->db->escape( $card_id ) . "' LIMIT 1" )->num_rows > 0;
+	}
+
+	/**
+	 * Check whether the order contains a subscription product
+	 *
+	 * The subscription table is filled only when the order gets its first status,
+	 * order_subscription already when the order is created, so this works at the
+	 * time the payment is created.
+	 *
+	 * @param int $order_id order id.
+	 *
+	 * @return bool
+	 * @since  1.0.5
+	 */
+	public function has_order_subscription( int $order_id ): bool {
+
+		if ( !$order_id ) {
+			return false;
+		}
+
+		return $this->db->query( "SELECT 1 FROM `" . DB_PREFIX . "order_subscription` WHERE `order_id` = '" .
+			(int)$order_id . "' LIMIT 1" )->num_rows > 0;
 	}
 
 	/**
@@ -194,19 +238,9 @@ class GoPay extends \Opencart\System\Engine\Model {
 			return false;
 		}
 
-		$card_id = $this->db->escape( $card_id );
-
-		$card = $this->db->query( "SELECT `id` FROM `" . DB_PREFIX .
-			"gopay_payment_cards` WHERE `customer_id` = '" . (int)$customer_id .
-			"' AND `card_id` = '" . $card_id . "'" )->row;
-
-		if ( !$card ) {
-			return false;
-		}
-
 		$this->db->query( "DELETE FROM `" . DB_PREFIX . "gopay_payment_cards` WHERE `customer_id` = '" .
-			(int)$customer_id . "' AND `card_id` = '" . $card_id . "'" );
+			(int)$customer_id . "' AND `card_id` = '" . $this->db->escape( $card_id ) . "'" );
 
-		return true;
+		return $this->db->countAffected() > 0;
 	}
 }
