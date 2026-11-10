@@ -1,0 +1,213 @@
+<style>
+    .gopay-card-selection-container {
+        padding: 0 12px 12px 12px;
+    }
+
+    .gopay-store-token-container {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .gopay-store-token-container input[type="checkbox"] {
+        margin: 0;
+    }
+
+    .gopay-store-token-container label {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #374151;
+        cursor: pointer;
+        margin-bottom: 0;
+    }
+
+    .gopay-card-list {
+        margin: 12px 0 0 0;
+        padding: 15px;
+        background: #fdfdfd;
+        border: 1px solid #e1e1e1;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .gopay-card-list__title {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 12px;
+        color: #2c3338;
+    }
+
+    .gopay-card-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .gopay-card-option {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        margin-bottom: 0;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gopay-card-option:hover {
+        border-color: #d1d1d1;
+        background: #fafafa;
+    }
+
+    .gopay-card-option input[type="radio"] {
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .gopay-card-option:has(input[type="radio"]:checked) {
+        border-color: #1a1a1a;
+        background: #f8f8f8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .gopay-card-option__content {
+        margin-left: 10px;
+        display: flex;
+        align-items: center;
+        flex: 1;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .gopay-card-option__art {
+        height: 28px;
+        width: 40px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        flex-shrink: 0;
+    }
+
+    .gopay-card-option__details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .gopay-card-option__brand {
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .gopay-card-option__number {
+        color: #666;
+        font-family: monospace;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .gopay-card-option__expiry {
+        color: #888;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+</style>
+<div id="gopay-card-selection" class="gopay-card-selection-container" style="display: none;">
+    {% if cards_partial_error %}
+        <div class="alert alert-warning mt-3 mb-0">{{ gopay_error_cards_partial }}</div>
+    {% endif %}
+    {% if cards %}
+        <div class="gopay-card-list">
+            <div class="gopay-card-list__title">{{ gopay_text_select_card }}</div>
+            <div class="gopay-card-options">
+                {% for card in cards %}
+                    <label class="gopay-card-option">
+                        <input type="radio" name="saved_card" value="{{ card.card_id|e('html_attr') }}"{% if loop.first %} checked{% endif %}/>
+                        <div class="gopay-card-option__content">
+                            {% if card.card_art_url %}
+                                <img src="{{ card.card_art_url|e('html_attr') }}" class="gopay-card-option__art" alt="{{ card.card_brand|e('html_attr') }}" onerror="this.remove();"/>
+                            {% endif %}
+                            <div class="gopay-card-option__details">
+                                <span class="gopay-card-option__brand">{{ card.card_brand|e }}</span>
+                                <span class="gopay-card-option__number">{{ card.real_masked_pan|e }}</span>
+                                <span class="gopay-card-option__expiry">({{ gopay_text_expiry }} {{ card.card_expiration|e }})</span>
+                            </div>
+                        </div>
+                    </label>
+                {% endfor %}
+                <label class="gopay-card-option is-new">
+                    <input type="radio" name="saved_card" value="new"/>
+                    <div class="gopay-card-option__content">
+                        <div class="gopay-card-option__details">
+                            <span class="gopay-card-option__brand">{{ gopay_text_new_card }}</span>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    {% endif %}
+    <div id="gopay-store-token" class="gopay-store-token-container">
+        <input type="checkbox" id="gopay-request-card-token" name="request_card_token" value="1"/>
+        <label for="gopay-request-card-token">{{ gopay_text_save_card }}</label>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        var form = $('#form-gopay');
+
+        // Saved cards and "save card" only for the card payment method.
+        var updateCardSelection = function (animate) {
+            var isCard = form.find('input[name="gopay_payment_method"]:checked').val() === 'PAYMENT_CARD';
+            var container = form.find('#gopay-card-selection');
+
+            if (isCard) {
+                animate ? container.slideDown() : container.show();
+            } else {
+                form.find('#gopay-request-card-token').prop('checked', false);
+                animate ? container.slideUp() : container.hide();
+            }
+        };
+
+        // "Save card" only for a new card - a saved card is saved already.
+        var updateStoreToken = function (animate) {
+            var savedCard = form.find('input[name="saved_card"]:checked').val();
+            var storeToken = form.find('#gopay-store-token');
+
+            if (!savedCard || savedCard === 'new') {
+                animate ? storeToken.slideDown() : storeToken.show();
+            } else {
+                form.find('#gopay-request-card-token').prop('checked', false);
+                animate ? storeToken.slideUp() : storeToken.hide();
+            }
+        };
+
+        // Bound to the form, which is replaced on every reload of the confirm
+        // step, so the handlers never pile up.
+        form.on('change', 'input[name="gopay_payment_method"], input[name="saved_card"]', function () {
+            updateCardSelection(true);
+            updateStoreToken(true);
+        });
+
+        updateCardSelection(false);
+        updateStoreToken(false);
+    });
+</script>

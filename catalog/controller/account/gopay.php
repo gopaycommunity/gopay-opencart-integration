@@ -83,6 +83,13 @@ class GoPay extends \Opencart\System\Engine\Controller
 		);
 		$banks           = array_intersect_key( $supported_banks, array_flip( $selected_banks ) );
 
+		// Saved cards only for orders without a subscription. The subscription
+		// record exists only after the first order status, order_subscription
+		// is created together with the order.
+		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
+		$card_fields_allowed = !$subscription && !$this->model_extension_opencart_gopay_payment_gopay->has_order_subscription(
+			(int)( $this->request->get['order_id'] ?? 0 ) );
+
 		// Check if subscription - only card payment is enabled.
 		if ( $subscription ) {
 			if ( array_key_exists( 'PAYMENT_CARD', (array) $payment_methods ) ) {
@@ -138,6 +145,15 @@ class GoPay extends \Opencart\System\Engine\Controller
 				$span,
 				$img
 			);
+
+			// Saved cards / save card choice under the card payment method, shared with the checkout.
+			if ( 'PAYMENT_CARD' === $payment_method && $card_fields_allowed ) {
+				$card_fields = $this->load->controller( 'extension/opencart_gopay/payment/gopay.card_fields' );
+
+				if ( is_string( $card_fields ) ) {
+					$enabled_payment_methods .= $card_fields;
+				}
+			}
 
 			$checked = '';
 		}

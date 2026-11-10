@@ -148,10 +148,52 @@ class GoPay extends \Opencart\System\Engine\Controller {
                 $img
             );
 
+            // Saved cards / save card choice under the card payment method.
+            if ( 'PAYMENT_CARD' === $payment_method && !$this->cart->hasSubscription() ) {
+                $enabled_payment_methods .= $this->card_fields();
+            }
+
             $checked = '';
         }
 
 		return $enabled_payment_methods;
+	}
+
+	/**
+	 * Saved payment cards of the customer for the card payment method
+	 *
+	 * Shared by the checkout and the retry payment box on the order page (the
+	 * account controller loads it through the loader). Renders nothing when card
+	 * tokenization is disabled, the customer is not logged in or no saved card
+	 * could be loaded at all - the customer then pays as usual.
+	 *
+	 * @return string
+	 * @since  1.0.5
+	 */
+	public function card_fields(): string {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
+
+		if ( !\GoPay_API::is_card_token_enabled( $this ) || !$this->customer->isLogged() ) {
+			return '';
+		}
+
+		$result = \GoPay_API::get_card_details( (int)$this->customer->getId(), $this );
+
+		// GoPay unavailable: no card section at all, not even "save card", the
+		// customer may have saved the card already.
+		if ( $result['error'] && !$result['cards'] ) {
+			return '';
+		}
+
+		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
+
+		// Only active cards can be used for a payment.
+		$data['cards'] = array_values( array_filter( $result['cards'], function ( array $card ): bool {
+			return 'ACTIVE' === $card['status'];
+		} ) );
+		$data['cards_partial_error'] = $result['error'];
+
+		return $this->load->view( 'extension/opencart_gopay/payment/gopay_card_fields', $data );
 	}
 
 	/**
@@ -237,6 +279,51 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		return $end_date;
 	}
 
+	/**
+	 * Card tokenization parameters of the payment
+	 *
+	 * Reads the saved card / save card choice from the request. Tokenization is
+	 * only for a logged in customer paying their own order without subscription,
+	 * and a saved card is used only when it belongs to the customer.
+	 *
+	 * @param array $order        order detail.
+	 * @param array $subscription subscription of the order, empty without one.
+	 *
+	 * @return array [ bool $request_card_token, string $card_id ]
+	 * @since  1.0.5
+	 */
+	private function get_card_token_params( array $order, array $subscription ): array {
+		$request_card_token = false;
+		$card_id            = '';
+
+		if ( !\GoPay_API::is_card_token_enabled( $this ) ||
+			!$this->customer->isLogged() ||
+			(int)$order['customer_id'] !== (int)$this->customer->getId() ||
+			$subscription ) {
+			return array( $request_card_token, $card_id );
+		}
+
+		$this->load->model( 'extension/opencart_gopay/payment/gopay' );
+
+		// Before the first payment the order has no subscription record yet.
+		if ( $this->model_extension_opencart_gopay_payment_gopay->has_order_subscription( (int)$order['order_id'] ) ) {
+			return array( $request_card_token, $card_id );
+		}
+
+		$request_card_token = !empty( $this->request->post['request_card_token'] );
+
+		$saved_card = trim( (string)( $this->request->post['saved_card'] ?? '' ) );
+		if ( $saved_card !== '' && $saved_card !== 'new' ) {
+			if ( $this->model_extension_opencart_gopay_payment_gopay->has_saved_card(
+				(int)$this->customer->getId(), $saved_card ) ) {
+				$card_id            = $saved_card;
+				$request_card_token = false;
+			}
+		}
+
+		return array( $request_card_token, $card_id );
+	}
+
 	public function create_payment(): void {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/log.php' );
@@ -294,6 +381,8 @@ class GoPay extends \Opencart\System\Engine\Controller {
 		$end_date = $this->calculate_subscription_end_date( $subscription );
 		$total    = $this->currency->format( $order['total'] , $this->session->data['currency'], 0, false ) * 100;
 
+		list( $request_card_token, $card_id ) = $this->get_card_token_params( $order, $subscription );
+
 		$response = \GoPay_API::create_payment(
 			$gopay_payment_method,
 			$order,
@@ -302,7 +391,9 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			$items,
 			$callback,
 			$total,
-			$this->session->data
+			$this->session->data,
+			$request_card_token,
+			$card_id
 		);
 
 		// Remove Order id from session to create a new one
