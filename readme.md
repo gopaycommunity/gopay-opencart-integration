@@ -55,6 +55,15 @@ This version includes following minor improvements:
 New release includes following patch:
 - Updated libraries to the latest version
 
+### 1.0.5
+New release comes with the following features:
+- Saved payment cards (card tokenization) - logged in customers can save a payment card and pay with it next time
+- Saved payment cards in the customer account - list and delete (OpenCart 4.1+ on the "Payment Methods" page)
+- New setting to enable saved payment cards (only for GoPay accounts with card tokenization enabled)
+- Fixed typos in the Polish admin translation
+- After upgrading from an older version, open the GoPay settings once to finish the update
+- Update GoPay extension to support OpenCart up to 4.1.0.4
+
 ## Development
 
 Running project on local machine for development and testing purposes.
