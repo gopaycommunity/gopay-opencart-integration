@@ -6,6 +6,7 @@ use Opencart\System\Library\Log;
 class GoPay extends \Opencart\System\Engine\Controller
 {
 	public function info( &$route, &$data ) {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$this->load->language( 'extension/opencart_gopay/sale/gopay' );
 		$this->load->model( 'extension/opencart_gopay/sale/gopay' );
 		$this->load->model( 'sale/order' );
@@ -18,8 +19,13 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$order_id = 0;
 		}
 
-		if ( $order_id ) {
-			$order = $this->model_sale_order->getOrder( $order_id );
+		$order = $order_id ? $this->model_sale_order->getOrder( $order_id ) : array();
+
+		// New order form or a missing order: the page as OpenCart rendered it.
+		if ( !$order ) {
+			$this->response->setOutput( $data['order_info'] );
+
+			return;
 		}
 
 		$data['order_total']     = round( $order['total'] * $order['currency_value'], 2 );
@@ -34,8 +40,8 @@ class GoPay extends \Opencart\System\Engine\Controller
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		if ( ( $order['order_status_id'] == 2 || $order['order_status_id'] == 5 ) && $order['payment_method'] == 'GoPay'
-		) {
+		// Paid GoPay order (Processing, Complete): the refund block.
+		if ( in_array( (int)$order['order_status_id'], array( 2, 5 ), true ) && \GoPay_API::is_gopay_order( $order ) ) {
 			$data['language'] = $this->config->get( 'config_language' );
 			$data['refund']   = $this->language->get( 'refund' );
 			$data['order_id'] = $order_id;

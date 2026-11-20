@@ -3,7 +3,8 @@
     elementExists = document.getElementById("tbody-gopay");
 
     if ( !elementExists ) {
-        $('#order-products').after('\
+        // Products of the order: #order-products up to OpenCart 4.0.2.x, #order-product in 4.1.
+        $('#order-products, #order-product').first().after('\
             <tbody id="tbody-gopay">\
                 <tr>\
                     <td colspan="5">\

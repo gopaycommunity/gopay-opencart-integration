@@ -6,6 +6,10 @@ $_['error_order_payment_creation_failed'] = 'Din păcate, comanda dvs. nu a putu
 $_['country_restriction_message']      = 'Plugin-ul gateway de plată GoPay dezactivat pentru țara selectată!';
 $_['subscription_restriction_message'] = 'Produsele și abonamentele nu pot fi achiziționate în același timp și este posibil doar un singur abonament pentru fiecare comandă.';
 
+// Retry payment
+$_['text_retry_payment']               = 'Reîncercați plata';
+$_['button_retry_payment']             = 'Plătiți din nou';
+
 // Saved payment cards
 $_['gopay_text_select_card']    = 'Selectați un card de plată';
 $_['gopay_text_new_card']       = 'Card nou';

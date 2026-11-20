@@ -6,6 +6,10 @@ $_['error_order_payment_creation_failed'] = 'Na žalost vašega naročila ni bil
 $_['country_restriction_message']      = 'Vtičnik plačilnega prehoda GoPay je onemogočen za izbrano državo!';
 $_['subscription_restriction_message'] = 'Izdelkov in naročnin ni mogoče kupiti sočasno in na eno prijavo je mogoče kupiti le eno naročnino.';
 
+// Retry payment
+$_['text_retry_payment']               = 'Ponovite plačilo';
+$_['button_retry_payment']             = 'Plačajte znova';
+
 // Saved payment cards
 $_['gopay_text_select_card']    = 'Izberite plačilno kartico';
 $_['gopay_text_new_card']       = 'Nova kartica';

@@ -6,6 +6,10 @@ $_['error_order_payment_creation_failed'] = 'Unfortunately your order could not 
 $_['country_restriction_message']      = 'GoPay payment gateway plugin disabled for selected Country!';
 $_['subscription_restriction_message'] = 'Products and subscriptions can not be purchased at the same time and only one subscription per checkout is possible.';
 
+// Retry payment
+$_['text_retry_payment']               = 'Retry payment';
+$_['button_retry_payment']             = 'Pay again';
+
 // Saved payment cards
 $_['gopay_text_select_card']    = 'Select payment card';
 $_['gopay_text_new_card']       = 'New Card';

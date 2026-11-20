@@ -6,6 +6,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 {
 
 	public function info( &$route, &$data ) {
+		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 		$this->load->model( 'setting/extension' );
 		$this->load->model( 'setting/setting' );
@@ -29,23 +30,30 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$order_id = 0;
 		}
 
+		// Empty for an order of another customer or a missing one.
 		$order = $this->model_account_order->getOrder( $order_id );
 
-		if ( ( $order['order_status_id'] == 1 || $order['order_status_id'] == 10 ) && $order['payment_method'] == 'GoPay'
-		) {
+		// Pending or failed GoPay order: offer to pay it again.
+		if ( $order && in_array( (int)$order['order_status_id'], array( 1, 10 ), true ) &&
+			\GoPay_API::is_gopay_order( $order ) ) {
 
 			$data['language'] = $this->config->get( 'config_language' );
 
 			$data['country_restriction_message']      = $this->language->get( 'country_restriction_message' );
-			$data['subscription_restriction_message'] = $this->language->get( 'country_restriction_message' );
+			$data['subscription_restriction_message'] = $this->language->get( 'subscription_restriction_message' );
 
 			$subscription = $this->db->query( 'SELECT * FROM `' . DB_PREFIX . 'subscription` WHERE order_id = ' .
 				(int)$order_id )->row;
 
-			$retry = '<h3>Retry payment</h3><div style="border: 1px solid rgb(217,222,226); padding: 10px">' .
-				$this->payment_gopay( $subscription ) .
-				'</div><div class="d-inline-block';
-			$data['order_info'] = str_replace('<div class="d-inline-block', $retry, $data['order_info'] );
+			$retry = '<h3>' . $this->language->get( 'text_retry_payment' ) .
+				'</h3><div style="border: 1px solid rgb(217,222,226); padding: 10px">' .
+				$this->payment_gopay( $subscription ) . '</div>';
+
+			// Above the "Continue" button, the last "text-end" block of the page in OpenCart 4.0.2 and 4.1.
+			$position = strrpos( $data['order_info'], '<div class="text-end' );
+			if ( $position !== false ) {
+				$data['order_info'] = substr_replace( $data['order_info'], $retry, $position, 0 );
+			}
 
 			$data['order_id'] = $order_id;
 		}
@@ -450,7 +458,8 @@ class GoPay extends \Opencart\System\Engine\Controller
     <form id=\"form-gopay\">" .
 			( !$retry_payment_method ? $this->payment_fields( $subscription ) : '' )	.
         "<div class=\"d-inline-block pt-2 pd-2 w-100 text-end\">
-            <button type=\"submit\" id=\"button-confirm\" class=\"btn btn-primary\">Retry payment</button>
+            <button type=\"submit\" id=\"button-confirm\" class=\"btn btn-primary\">" .
+			$this->language->get( 'button_retry_payment' ) . "</button>
         </div>
     </form>
 </fieldset>

@@ -6,6 +6,10 @@ $_['error_order_payment_creation_failed'] = 'Vaši objednávku se bohužel nepod
 $_['country_restriction_message']      = 'Zásuvný modul platební brány GoPay je pro vybranou zemi zakázán!';
 $_['subscription_restriction_message'] = 'Produkty a předplatné nelze zakoupit současně a na jednu pokladnu je možné zakoupit pouze jedno předplatné.';
 
+// Retry payment
+$_['text_retry_payment']               = 'Opakovat platbu';
+$_['button_retry_payment']             = 'Zaplatit znovu';
+
 // Saved payment cards
 $_['gopay_text_select_card']    = 'Vyberte platební kartu';
 $_['gopay_text_new_card']       = 'Nová karta';

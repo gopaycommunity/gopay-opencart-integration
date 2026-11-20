@@ -6,6 +6,10 @@ $_['error_order_payment_creation_failed'] = 'Niestety Twoje zamówienie nie mog�
 $_['country_restriction_message']      = 'Plugin bramki płatności GoPay wyłączony dla wybranego kraju!';
 $_['subscription_restriction_message'] = 'Produkty i subskrypcje nie mogą być zakupione w tym samym czasie i tylko jedna subskrypcja na kasę jest możliwa.';
 
+// Retry payment
+$_['text_retry_payment']               = 'Ponów płatność';
+$_['button_retry_payment']             = 'Zapłać ponownie';
+
 // Saved payment cards
 $_['gopay_text_select_card']    = 'Wybierz kartę płatniczą';
 $_['gopay_text_new_card']       = 'Nowa karta';

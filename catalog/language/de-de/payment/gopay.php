@@ -6,6 +6,10 @@ $_['error_order_payment_creation_failed'] = 'Ihre Bestellung konnte leider nicht
 $_['country_restriction_message']      = 'GoPay-Zahlungsgateway-Plugin für ausgewähltes Land deaktiviert!';
 $_['subscription_restriction_message'] = 'Produkte und Abonnements können nicht gleichzeitig gekauft werden und es ist nur ein Abonnement pro Kasse möglich.';
 
+// Retry payment
+$_['text_retry_payment']               = 'Zahlung wiederholen';
+$_['button_retry_payment']             = 'Erneut bezahlen';
+
 // Saved payment cards
 $_['gopay_text_select_card']    = 'Zahlungskarte auswählen';
 $_['gopay_text_new_card']       = 'Neue Karte';
