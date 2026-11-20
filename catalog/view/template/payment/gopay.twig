@@ -25,9 +25,12 @@
 </fieldset>
 <script type="text/javascript">
     // Check Apple pay
+    // Safari throws an exception (e.g. on http://), it must not stop the rest of the script.
     var applePayAvailable = false;
-    if(window.ApplePaySession && window.ApplePaySession.canMakePayments()) {
-        applePayAvailable = true;
+    try {
+        applePayAvailable = !!(window.ApplePaySession && window.ApplePaySession.canMakePayments());
+    } catch (e) {
+        applePayAvailable = false;
     }
 
     var applePay = document.getElementsByName('APPLE_PAY');
