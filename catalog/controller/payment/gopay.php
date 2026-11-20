@@ -7,6 +7,11 @@ class GoPay extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$this->webhook();
 
+		// The payment form needs the cart, it is empty e.g. when the route is opened directly.
+		if ( !$this->cart->hasProducts() ) {
+			return '';
+		}
+
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 		$this->load->model( 'setting/extension' );
 
@@ -334,12 +339,25 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
 		$data = [];
 
-		if ( !isset( $this->request->get['order_id'] ) ) {
-			$data['error']['warning'] = $this->language->get( 'error_order' );
+		$order_id = (int)( $this->request->get['order_id'] ?? 0 );
+		$order    = $order_id ? $this->model_checkout_order->getOrder( $order_id ) : array();
+
+		// Checkout: the order of the session. Payment retry: an unpaid order of the logged in customer.
+		$is_checkout_order = (int)( $this->session->data['order_id'] ?? 0 ) === $order_id;
+		$is_retry_order    = $order && $this->customer->isLogged() &&
+			(int)$order['customer_id'] === (int)$this->customer->getId() &&
+			in_array( (int)$order['order_status_id'], array( 1, 10 ), true );
+
+		if ( !$order || !\GoPay_API::is_gopay_order( $order ) || !( $is_checkout_order || $is_retry_order ) ) {
+			$data['failure'] = $this->url->link( 'checkout/failure', 'language=' . $this->config->get( 'config_language' ),
+				true );
+
+			$this->response->addHeader( 'Content-Type: application/json' );
+			$this->response->setOutput( json_encode( $data ) );
+
+			return;
 		}
 
-		$order_id       = $this->request->get['order_id'];
-		$order          = $this->model_checkout_order->getOrder( $order_id );
 		$currency       = $this->session->data['currency'];
 		$currency_id    = $this->currency->getId( $currency );
 		$currency_value = $this->currency->getValue( $currency );
@@ -352,6 +370,9 @@ class GoPay extends \Opencart\System\Engine\Controller {
 			"', `currency_value` = '" . (float)$currency_value .
 			"', `date_modified` = NOW() WHERE `order_id` = '" . (int)$order_id . "'" );
 		// End
+
+		// The payment is created in the currency of the session, which is now the currency of the order.
+		$order = $this->model_checkout_order->getOrder( $order_id );
 
 		if ( array_key_exists( 'gopay_payment_method', $this->request->post ) ) {
 			$gopay_payment_method = $this->request->post['gopay_payment_method'];
@@ -435,6 +456,11 @@ class GoPay extends \Opencart\System\Engine\Controller {
 
 		if ( $gopay_api && $transaction_id ) {
 			\GoPay_API::check_payment_status( $transaction_id, $order_id, $gopay_payment_method, $this );
+
+			// A valid callback was redirected by check_payment_status(), this one is invalid
+			// or GoPay returned an error.
+			$this->response->redirect( $this->url->link( 'checkout/failure', 'language=' .
+				$this->config->get( 'config_language' ) ) );
 		}
 	}
 }

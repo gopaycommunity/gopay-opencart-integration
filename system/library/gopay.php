@@ -181,14 +181,16 @@ class GoPay_API {
 		$version = null;
 
 		if (is_file($manifest)) {
-			$data = json_decode(file_get_contents($manifest), true);
-			$version = $data['version'] ?? null;
+			$manifest_data = json_decode(file_get_contents($manifest), true);
+			$version       = $manifest_data['version'] ?? null;
 		}
 
+		// Order number, currency and language are always taken from the order, the caller
+		// passes the order after the currency of the session was applied to it.
 		$additional_params = array(
 			array(
 				'name'  => 'order_id',
-				'value' => array_key_exists( 'order_id', $data ) ? $data['order_id'] : $order['order_id'],
+				'value' => $order['order_id'],
 			),
 			array(
 				'name'  => 'gopay_plugin',
@@ -196,12 +198,8 @@ class GoPay_API {
 			) );
 
 		$language = 'EN';
-		if ( array_key_exists( 'shipping_address', $data ) ) {
-			$language = $country_to_language[ $data['shipping_address']['iso_code_2'] ];
-		} else {
-			if ( $order['shipping_iso_code_2'] != '' ) {
-				$language = $country_to_language[ $order['shipping_iso_code_2'] ];
-			}
+		if ( $order['shipping_iso_code_2'] != '' ) {
+			$language = $country_to_language[ $order['shipping_iso_code_2'] ];
 		}
 		if ( !array_key_exists( $language, $languages ) ) {
 			$language = $options['payment_gopay_default_language'];
@@ -210,8 +208,8 @@ class GoPay_API {
 		$data  = array(
 			'payer'             => $payer,
 			'amount'            => $total,
-			'currency'          => array_key_exists( 'currency', $data ) ? $data['currency'] : $order['currency_code'],
-			'order_number'      => array_key_exists( 'order_id', $data ) ? $data['order_id'] : $order['order_id'],
+			'currency'          => $order['currency_code'],
+			'order_number'      => $order['order_id'],
 			'order_description' => 'order',
 			'items'             => $items,
 			'additional_params' => $additional_params,
@@ -448,7 +446,31 @@ class GoPay_API {
 	}
 
 	/**
+	 * True if the order was placed with the GoPay payment method
+	 *
+	 * OpenCart 4.0.2+ returns the payment method as an array with the code `gopay.gopay`.
+	 *
+	 * @param array $order order detail.
+	 *
+	 * @return bool
+	 * @since  1.0.6
+	 */
+	public static function is_gopay_order( array $order ): bool {
+		$payment_method = $order['payment_method'] ?? '';
+		if ( is_string( $payment_method ) && is_array( json_decode( $payment_method, true ) ) ) {
+			$payment_method = json_decode( $payment_method, true );
+		}
+		$code = is_array( $payment_method ) ? (string)( $payment_method['code'] ?? '' ) : (string)$payment_method;
+
+		return stripos( $code, 'gopay' ) === 0;
+	}
+
+	/**
 	 * Check payment status
+	 *
+	 * The order id and the payment id come from the return/notification URL. The order
+	 * is changed only if it is a GoPay order and the payment belongs to it (order number
+	 * and currency of the payment), otherwise the function returns without a change.
 	 *
 	 * @param string $gopay_transaction_id GoPay transaction id.
 	 * @param string $order_id             Order id.
@@ -461,22 +483,32 @@ class GoPay_API {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/log.php' );
 		$controller->load->model( 'checkout/order' );
 
+		$order_id       = (int)$order_id;
+		$transaction_id = (string)$gopay_transaction_id;
+		$order          = $order_id > 0 ? $controller->model_checkout_order->getOrder( $order_id ) : array();
+
+		if ( !$order || !self::is_gopay_order( $order ) || !ctype_digit( $transaction_id ) ) {
+			return;
+		}
+
 		$options  = $controller->model_setting_setting->getSetting( 'payment_gopay' );
 		$gopay    = self::auth_gopay( $options );
-		$response = $gopay->getStatus( $gopay_transaction_id );
+		$response = $gopay->getStatus( $transaction_id );
+		$valid    = 200 == $response->statusCode &&
+			(int)( $response->json['order_number'] ?? 0 ) === $order_id &&
+			( $response->json['currency'] ?? '' ) === $order['currency_code'];
 
 		// Save log.
 		$log = array(
 			'order_id'       => $order_id,
-			'transaction_id' => 200 == $response->statusCode ? $response->json['id'] : '0',
-			'message'        => 200 == $response->statusCode ? 'Checking payment status' :
-				'Error checking payment status',
-			'log_level'      => 200 == $response->statusCode ? 'INFO' : 'ERROR',
+			'transaction_id' => (int)$transaction_id,
+			'message'        => $valid ? 'Checking payment status' : 'Error checking payment status',
+			'log_level'      => $valid ? 'INFO' : 'ERROR',
 			'log'            => $response,
 		);
 		\Log::insert_log( $controller, $log );
 
-		if ( 200 != $response->statusCode ) {
+		if ( !$valid ) {
 			return;
 		}
 

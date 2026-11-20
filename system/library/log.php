@@ -33,16 +33,16 @@ class Log {
 
 		$table_name = "gopay_log";
 		$data       = array(
-			'order_id'       => $log['order_id'],
-			'transaction_id' => $log['transaction_id'],
-			'message'        => $log['message'],
+			'order_id'       => (int)$log['order_id'],
+			'transaction_id' => (int)$log['transaction_id'],
+			'message'        => $controller->db->escape( (string)$log['message'] ),
 			'created_at'     => gmdate( 'Y-m-d H:i:s' ),
-			'log_level'      => $log['log_level'],
-			'log'            => $encodedLog,
+			'log_level'      => $controller->db->escape( (string)$log['log_level'] ),
+			'log'            => $controller->db->escape( (string)$encodedLog ),
 		);
-		$where      = "`order_id` = '" . $log['order_id'] .
-			"' AND `transaction_id` = '" . $log['transaction_id'] .
-			"' AND `message` = '" . $log['message'] . "'";
+		$where      = "`order_id` = '" . $data['order_id'] .
+			"' AND `transaction_id` = '" . $data['transaction_id'] .
+			"' AND `message` = '" . $data['message'] . "'";
 
 		$response = $controller->db->query(
 			"SELECT * FROM `" . DB_PREFIX . $table_name . "` WHERE " . $where )->row;
