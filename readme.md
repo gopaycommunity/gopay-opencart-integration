@@ -64,6 +64,20 @@ New release comes with the following features:
 - After upgrading from an older version, open the GoPay settings once to finish the update
 - Update GoPay extension to support OpenCart up to 4.1.0.4
 
+### 1.0.6
+New release includes following fixes:
+- Payment return and notification verify that the payment belongs to the order (order number and currency)
+- Payment can be created only for the customer's own order
+- Payment is created in the currency of the order
+- Safe logging of the values from the payment return and notification
+- Settings are saved once, the response no longer contains the client secret
+- Wrong GoPay credentials disable the gateway and are no longer cleared
+- Payment methods and banks are loaded from GoPay also in production mode and are kept when GoPay is not available
+- Payment retry and refund block are shown on the order detail again (OpenCart 4.0.2+)
+- Missing translation of the partial refund message in the admin
+- Payment methods work in Safari when Apple Pay is not available
+- PHP 8.2+ deprecation fix
+
 ## Development
 
 Running project on local machine for development and testing purposes.
