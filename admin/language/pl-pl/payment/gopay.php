@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'Włącz tę opcję tylko wtedy, gdy zap
 
 # Error
 $_['error_permission']                = 'Musisz mieć uprawnienia do modyfikacji płatności GoPay!';
+$_['error_credentials']               = 'Nieprawidłowy Client ID lub Client Secret. Bramka płatności GoPay została wyłączona.';
+$_['error_goid']                      = 'Nieprawidłowy identyfikator GoID. Bramka płatności GoPay została wyłączona.';
+$_['error_methods_unavailable']       = 'Nie udało się pobrać metod płatności z GoPay. Zachowano ostatnio pobrane metody płatności. Odśwież stronę później.';

@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'Ezt az opciót csak akkor engedélyezze
 
 # Error
 $_['error_permission']                = 'Engedélyre van szüksége a fizetés módosításához GoPay!';
+$_['error_credentials']               = 'Érvénytelen Client ID vagy Client Secret. A GoPay fizetési átjáró ki lett kapcsolva.';
+$_['error_goid']                      = 'Érvénytelen GoID. A GoPay fizetési átjáró ki lett kapcsolva.';
+$_['error_methods_unavailable']       = 'A fizetési módokat nem sikerült betölteni a GoPay-ből. A legutóbb betöltött fizetési módok maradnak érvényben. Kérjük, töltse be újra az oldalt később.';

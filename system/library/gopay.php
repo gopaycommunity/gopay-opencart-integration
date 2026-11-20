@@ -58,17 +58,22 @@ class GoPay_API {
 	 *
 	 * @param string $currency Currency.
 	 * @param array  $options  Setting options.
-	 * @return array
+	 * @return ?array payment methods and banks, null when GoPay did not answer (a currency
+	 *                without payment methods is answered with empty lists)
 	 * @since  1.0.0
 	 */
-	public static function check_enabled_on_gopay( string $currency, $options, string $language_code ): array {
+	public static function check_enabled_on_gopay( string $currency, $options, string $language_code ): ?array {
 		$gopay   = self::auth_gopay( $options );
 
 		$payment_methods  = array();
 		$banks            = array();
 		$enabled_payments = $gopay->getPaymentInstruments( $options['payment_gopay_goid'], $currency . '?lang=' . $language_code );
 
-		if ( 200 == $enabled_payments->statusCode && isset( $enabled_payments->json['enabledPaymentInstruments'] ) ) {
+		if ( 200 != $enabled_payments->statusCode ) {
+			return null;
+		}
+
+		if ( isset( $enabled_payments->json['enabledPaymentInstruments'] ) ) {
 			// Determine if the specified language code exists in the response
 			$paymentInstrument = reset($enabled_payments->json['enabledPaymentInstruments']);
 			$language_code = isset($paymentInstrument['label'][$language_code]) ? $language_code : 'cs';

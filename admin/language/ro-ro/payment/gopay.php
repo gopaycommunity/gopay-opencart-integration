@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'Activați această opțiune numai dacă
 
 # Error
 $_['error_permission']                = 'Aveți nevoie de permisiunea de a modifica plata GoPay!';
+$_['error_credentials']               = 'Client ID sau Client Secret invalid. Gateway-ul de plată GoPay a fost dezactivat.';
+$_['error_goid']                      = 'GoID invalid. Gateway-ul de plată GoPay a fost dezactivat.';
+$_['error_methods_unavailable']       = 'Metodele de plată nu au putut fi încărcate din GoPay. Se păstrează ultimele metode de plată încărcate. Vă rugăm să reîncărcați pagina mai târziu.';

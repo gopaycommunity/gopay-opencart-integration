@@ -65,7 +65,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 		# End load countries
 
 		# Check GoPay credentials and load options
-		$this->process_admin_options();
+		$data['error_warning'] = $this->process_admin_options();
 		$data = array_merge( $data, $this->model_setting_setting->getSetting( 'payment_gopay' ) );
 		$data['payment_gopay_test']        = array_key_exists( 'payment_gopay_test', $data ) &&
 									is_numeric( $data['payment_gopay_test'] ) ? $data['payment_gopay_test'] : 1;
@@ -262,23 +262,24 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$this->load->model( 'setting/setting' );
 		$this->load->language( 'extension/opencart_gopay/payment/gopay' );
 
-		$data = [];
+		// Only the result goes back to the browser, never the settings (they contain the client secret).
+		$json = [];
 		if ( !$this->user->hasPermission( 'modify', 'extension/opencart_gopay/payment/gopay' ) ) {
-			$data['error'] = $this->language->get( 'error_permission' );
+			$json['error'] = $this->language->get( 'error_permission' );
 		}
 
-		if ( !$data ) {
-			$data = $this->model_setting_setting->getSetting( 'payment_gopay' );
+		if ( !$json ) {
+			$setting = $this->model_setting_setting->getSetting( 'payment_gopay' );
 			foreach ( $this->request->post as $key => $value ) {
-				$data[ $key ] = $value;
+				$setting[ $key ] = $value;
 			}
 
-			$this->model_setting_setting->editSetting( 'payment_gopay', $data );
-			$data['success'] = $this->language->get( 'text_success' );
+			$this->model_setting_setting->editSetting( 'payment_gopay', $setting );
+			$json['success'] = $this->language->get( 'text_success' );
 		}
 
 		$this->response->addHeader( 'Content-Type: application/json' );
-		$this->response->setOutput( json_encode( $data ) );
+		$this->response->setOutput( json_encode( $json ) );
 	}
 
 	/**
@@ -308,10 +309,14 @@ class GoPay extends \Opencart\System\Engine\Controller
 	/**
 	 * Process admin options.
 	 *
-	 * @return bool
+	 * Checks the GoPay credentials and loads the payment methods and banks enabled
+	 * on the GoPay account. Wrong credentials are kept so they can be corrected,
+	 * the payment gateway is disabled instead.
+	 *
+	 * @return string error message for the settings page, empty when there is none
 	 * @since  1.0.0
 	 */
-	public function process_admin_options(): bool {
+	public function process_admin_options(): string {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
 
@@ -326,57 +331,54 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$this->add_cards_account_event();
 		}
 
-		// Check payment methods and banks enabled on GoPay account.
-		if ( ! empty( $this->config->get( 'payment_gopay_goid' ) ) &&
-			 ! empty( $this->config->get( 'payment_gopay_test' ) ) ) {
-			$this->check_enabled_on_gopay();
-		}
-
 		// Check credentials (GoID, Client ID and Client Secret).
 		if ( empty( $this->config->get( 'payment_gopay_goid' ) ) ||
 			empty( $this->config->get( 'payment_gopay_client_id' ) ) ||
 			empty( $this->config->get( 'payment_gopay_client_secret' ) )
 		) {
-			return false;
-		} else {
-			if ( array_key_exists( 'payment_gopay_test', $options ) ) {
-				$gopay = \GoPay_API::auth_gopay( $options );
+			return '';
+		}
 
-				$response = $gopay->getPaymentInstruments(
-					$this->config->get( 'payment_gopay_goid' ), 'CZK' );
+		if ( array_key_exists( 'payment_gopay_test', $options ) ) {
+			$gopay = \GoPay_API::auth_gopay( $options );
 
-				if ( !$response->hasSucceed() ) {
-					if ( array_key_exists( 'errors', $response->json ) &&
-						$response->json['errors'][0]['error_name'] == 'INVALID' ) {
-						$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_goid', '' );
+			// Only a rejection of the credentials disables the gateway, not an unavailable GoPay API.
+			$error_name = function ( $response ): string {
+				return (string)( $response->json['errors'][0]['error_name'] ?? '' );
+			};
 
-						return false;
-					}
-				}
+			if ( $error_name( $gopay->getAuth()->authorize()->response ) == 'AUTH_WRONG_CREDENTIALS' ) {
+				$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_status', '0' );
 
-				$response = $gopay->getAuth()->authorize()->response;
-				if ( array_key_exists( 'errors', $response->json ) &&
-					$response->json['errors'][0]['error_name'] == 'AUTH_WRONG_CREDENTIALS' ) {
-					$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_client_id', '' );
-					$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_client_secret', '' );
+				return $this->language->get( 'error_credentials' );
+			}
 
-					return false;
-				}
+			if ( $error_name( $gopay->getPaymentInstruments( $this->config->get( 'payment_gopay_goid' ), 'CZK' ) ) == 'INVALID' ) {
+				$this->model_setting_setting->editValue( 'payment_gopay', 'payment_gopay_status', '0' );
 
+				return $this->language->get( 'error_goid' );
+			}
+
+			// Payment methods and banks enabled on the GoPay account of the current mode (test or production).
+			if ( !$this->check_enabled_on_gopay() ) {
+				return $this->language->get( 'error_methods_unavailable' );
 			}
 		}
-		// END.
 
-		return true;
+		return '';
 	}
 
 	/**
 	 * Check payment methods and banks that
 	 * are enabled on GoPay account.
 	 *
+	 * When GoPay does not answer for a currency, the payment methods and banks saved
+	 * for it are kept, so an unavailable GoPay API does not empty the checkout.
+	 *
+	 * @return bool true when the payment methods of all currencies were loaded
 	 * @since 1.0.0
 	 */
-	public function check_enabled_on_gopay() {
+	public function check_enabled_on_gopay(): bool {
 		require_once( DIR_EXTENSION . '/opencart_gopay/system/library/gopay.php' );
 		$options = $this->model_setting_setting->getSetting( 'payment_gopay' );
 
@@ -392,8 +394,16 @@ class GoPay extends \Opencart\System\Engine\Controller
 		$language_code = $this->config->get( 'config_language' );
 		$language_code = strstr($language_code, '-', true) ?: $language_code;
 
+		$loaded = true;
 		foreach ( $setting['currencies'] as $currency => $value ) {
-			$supported       = \GoPay_API::check_enabled_on_gopay( $currency, $options, $language_code );
+			$supported = \GoPay_API::check_enabled_on_gopay( $currency, $options, $language_code );
+
+			if ( null === $supported ) {
+				$loaded = false;
+
+				continue;
+			}
+
 			$payment_methods = $payment_methods + $supported[0];
 			$banks           = $banks + $supported[1];
 
@@ -401,10 +411,11 @@ class GoPay extends \Opencart\System\Engine\Controller
 			$options['payment_gopay_banks_' . $currency] = $supported[1];
 		}
 
-		if ( ! empty( $payment_methods ) ) {
+		// The lists of all payment methods and banks only from a complete answer.
+		if ( $loaded && ! empty( $payment_methods ) ) {
 			$options['payment_gopay_option_payment_methods'] = $payment_methods;
 		}
-		if ( ! empty( $banks ) ) {
+		if ( $loaded && ! empty( $banks ) ) {
 			if ( array_key_exists( 'OTHERS', $banks ) ) {
 				// Send 'Others' to the end.
 				$other = $banks['OTHERS'];
@@ -415,5 +426,7 @@ class GoPay extends \Opencart\System\Engine\Controller
 		}
 
 		$this->model_setting_setting->editSetting( 'payment_gopay', $options );
+
+		return $loaded;
 	}
 }

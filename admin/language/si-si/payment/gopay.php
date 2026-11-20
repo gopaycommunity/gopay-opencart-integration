@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'To možnost omogočite samo, če je shr
 
 # Error
 $_['error_permission']                = 'Potrebujete dovoljenje za spreminjanje plačila GoPay!';
+$_['error_credentials']               = 'Neveljaven Client ID ali Client Secret. Plačilni prehod GoPay je bil onemogočen.';
+$_['error_goid']                      = 'Neveljaven GoID. Plačilni prehod GoPay je bil onemogočen.';
+$_['error_methods_unavailable']       = 'Načinov plačila ni bilo mogoče naložiti iz GoPay. Ohranjeni so zadnji naloženi načini plačila. Stran znova naložite pozneje.';

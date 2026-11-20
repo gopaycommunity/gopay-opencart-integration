@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'Aktivieren Sie diese Option nur, wenn d
 
 # Error
 $_['error_permission']                = 'Sie benötigen eine Erlaubnis zum Ändern der Zahlung GoPay!';
+$_['error_credentials']               = 'Ungültige Client ID oder ungültiges Client Secret. Das GoPay-Zahlungsgateway wurde deaktiviert.';
+$_['error_goid']                      = 'Ungültige GoID. Das GoPay-Zahlungsgateway wurde deaktiviert.';
+$_['error_methods_unavailable']       = 'Die Zahlungsmethoden konnten nicht von GoPay geladen werden. Die zuletzt geladenen Zahlungsmethoden bleiben erhalten. Bitte laden Sie die Seite später neu.';

@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'Enable this option only if card saving 
 
 # Error
 $_['error_permission']                = 'You need permission to modify payment GoPay!';
+$_['error_credentials']               = 'Invalid Client ID or Client Secret. The GoPay payment gateway has been disabled.';
+$_['error_goid']                      = 'Invalid GoID. The GoPay payment gateway has been disabled.';
+$_['error_methods_unavailable']       = 'Payment methods could not be loaded from GoPay. The last loaded payment methods are kept. Please reload the page later.';

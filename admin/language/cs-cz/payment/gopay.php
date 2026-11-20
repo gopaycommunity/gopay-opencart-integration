@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'Tuto možnost povolte pouze pokud máte
 
 # Error
 $_['error_permission']                = 'K úpravě platby GoPay potřebujete oprávnění!';
+$_['error_credentials']               = 'Neplatné Client ID nebo Client Secret. Platební brána GoPay byla vypnuta.';
+$_['error_goid']                      = 'Neplatné GoID. Platební brána GoPay byla vypnuta.';
+$_['error_methods_unavailable']       = 'Platební metody se nepodařilo načíst z GoPay. Zůstávají naposledy načtené metody. Zkuste stránku obnovit později.';

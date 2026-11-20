@@ -53,3 +53,6 @@ $_['gopay_card_token_warning']        = 'Omogućite ovu opciju samo ako je sprem
 
 # Error
 $_['error_permission']                = 'Trebate dopuštenje za izmjenu plaćanja GoPay!';
+$_['error_credentials']               = 'Neispravan Client ID ili Client Secret. GoPay pristupnik plaćanja je onemogućen.';
+$_['error_goid']                      = 'Neispravan GoID. GoPay pristupnik plaćanja je onemogućen.';
+$_['error_methods_unavailable']       = 'Načine plaćanja nije bilo moguće učitati iz GoPaya. Zadržani su posljednji učitani načini plaćanja. Ponovno učitajte stranicu kasnije.';

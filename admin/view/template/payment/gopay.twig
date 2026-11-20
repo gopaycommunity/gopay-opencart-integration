@@ -18,7 +18,10 @@
         <div class="card">
             <div class="card-header"><i class="fa-solid fa-pencil"></i> {{ text_edit }}</div>
             <div class="card-body">
-                <form id="form-payment" action="{{ save }}" method="post" data-oc-toggle="ajax">
+                {% if error_warning %}
+                    <div class="alert alert-danger"><i class="fa-solid fa-circle-exclamation"></i> {{ error_warning }}</div>
+                {% endif %}
+                <form id="form-payment" action="{{ save }}" method="post">
                     {% if payment_gopay_goid is empty or payment_gopay_client_id is empty or payment_gopay_client_secret is empty %}
                         <div class="row mb-3">
                             <label for="input-enabled" class="col-sm-2 col-form-label">{{ gopay_enable_disable }}</label>
@@ -247,7 +250,15 @@
             cache: false,
             processData: false,
             async: true,
-            success: function () {
+            success: function (json) {
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' +
+                        json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+
+                    return;
+                }
+
+                // Reload: after the credentials are entered the form shows all the settings.
                 window.location.reload(true);
             },
             error: function (xhr, ajaxOptions, thrownError) {
